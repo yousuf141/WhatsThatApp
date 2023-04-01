@@ -10,7 +10,7 @@ const BaseScreen: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {loggedIn === false ? <AuthScreen /> : <HomeScreen />}
+      {!loggedIn ? <AuthScreen /> : <HomeScreen />}
     </NavigationContainer>
   );
 };

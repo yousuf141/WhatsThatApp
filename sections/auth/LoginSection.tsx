@@ -1,9 +1,9 @@
 import React from "react";
 import { View } from "react-native";
 
-import { NavigationProp } from "@react-navigation/native";
+import { type NavigationProp } from "@react-navigation/native";
 
-import { Button, HelperText, Snackbar, TextInput } from "react-native-paper";
+import { Button, Snackbar, TextInput } from "react-native-paper";
 
 import { validateEmail } from "../../utils/validators";
 import FormInput from "../../components/forms/FormInput";
@@ -19,23 +19,24 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
 
-  function handleLogin() {
+  function handleLogin(): void {
     if (!isEmailValid) {
       showSnackbar("Please make sure all fields are valid.");
-      return;
     }
 
     // TODO: implement actual login
   }
 
-  function handleGoToSignUp() {
+  function handleGoToSignUp(): void {
     navigation.navigate("SignUpSection");
   }
 
-  function showSnackbar(message: string, time: number = 1500) {
+  function showSnackbar(message: string, time: number = 1500): void {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
-    setTimeout(() => setSnackbarVisible(false), time);
+    setTimeout(() => {
+      setSnackbarVisible(false);
+    }, time);
   }
 
   return (
@@ -68,7 +69,9 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       <Snackbar
         visible={snackbarVisible}
         duration={3000}
-        onDismiss={() => setSnackbarVisible(false)}
+        onDismiss={() => {
+          setSnackbarVisible(false);
+        }}
       >
         {snackbarMessage}
       </Snackbar>

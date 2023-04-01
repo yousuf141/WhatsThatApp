@@ -7,7 +7,7 @@ interface FormInputProps {
   left?: React.ReactNode;
   value?: string | undefined;
   secureTextEntry?: boolean | undefined;
-  onChangeText?: (((text: string) => void) & Function) | undefined;
+  onChangeText?: ((text: string) => void) | undefined;
   error?: boolean | undefined;
   errorMessage?: string | undefined;
 }
@@ -21,8 +21,10 @@ const FormInput: React.FC<FormInputProps> = ({
   error,
   errorMessage,
 }) => {
-  function renderErrorMessage() {
-    if (error) return <HelperText type="error">{errorMessage}</HelperText>;
+  function renderErrorMessage(): React.ReactNode {
+    if (error === true)
+      return <HelperText type="error">{errorMessage}</HelperText>;
+    return <></>;
   }
 
   return (
