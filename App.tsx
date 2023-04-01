@@ -1,6 +1,6 @@
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import BaseScreen from "./components/screens/BaseScreen";
+import BaseScreen from "./screens/BaseScreen";
 
 const App: React.FC = () => {
   return (
