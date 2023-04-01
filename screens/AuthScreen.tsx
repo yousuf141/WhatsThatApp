@@ -1,11 +1,26 @@
 import React from "react";
-import { Text, View } from "react-native";
+
+import { createStackNavigator } from "@react-navigation/stack";
+
+import LoginSection from "../components/sections/auth/LoginSection";
+import SignUpSection from "../components/sections/auth/SignUpSection";
+
+const Stack = createStackNavigator();
 
 const AuthScreen: React.FC = () => {
   return (
-    <View>
-      <Text>Auth Screen!</Text>
-    </View>
+    <Stack.Navigator initialRouteName="LoginSection">
+      <Stack.Screen
+        options={{ headerTitle: "Login" }}
+        name="LoginSection"
+        component={LoginSection}
+      />
+      <Stack.Screen
+        options={{ headerTitle: "Sign Up" }}
+        name="SignUpSection"
+        component={SignUpSection}
+      />
+    </Stack.Navigator>
   );
 };
 
