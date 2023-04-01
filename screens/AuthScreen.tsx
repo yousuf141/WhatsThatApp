@@ -2,8 +2,8 @@ import React from "react";
 
 import { createStackNavigator } from "@react-navigation/stack";
 
-import LoginSection from "../components/sections/auth/LoginSection";
-import SignUpSection from "../components/sections/auth/SignUpSection";
+import LoginSection from "../sections/auth/LoginSection";
+import SignUpSection from "../sections/auth/SignUpSection";
 
 const Stack = createStackNavigator();
 
