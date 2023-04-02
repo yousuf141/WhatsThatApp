@@ -5,12 +5,18 @@ import { type NavigationProp } from "@react-navigation/native";
 
 import { Button, Snackbar, TextInput } from "react-native-paper";
 
+import { useAuth } from "../../providers/AuthProvider";
+
+import { userService } from "../../services/userService";
+
 import { validateEmail } from "../../utils/validators";
 import FormInput from "../../components/forms/FormInput";
 
 const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   navigation,
 }) => {
+  const [, authDispatch] = useAuth();
+
   const [email, setEmail] = React.useState<string>("");
   const isEmailValid = validateEmail(email);
 
@@ -19,12 +25,19 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
 
-  function handleLogin(): void {
+  async function handleLogin(): Promise<void> {
     if (!isEmailValid) {
       showSnackbar("Please make sure all fields are valid.");
     }
 
-    // TODO: implement actual login
+    const res = await userService.login(email, password);
+    if (!res.success) {
+      if (res.errorCode === 400) showSnackbar("Invalid username/Password.");
+      else showSnackbar("Unknown Error. Please try again.");
+      return;
+    }
+
+    authDispatch({ userId: res.data.user_id, key: res.data.session_token });
   }
 
   function handleGoToSignUp(): void {
@@ -62,9 +75,11 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       </View>
       <View>
         <Button
-          style={{ marginBottom: 10 }}
+          style={{ marginBottom: 10, marginHorizontal: 10 }}
           mode="contained"
-          onPress={handleLogin}
+          onPress={() => {
+            void handleLogin();
+          }}
         >
           Log In
         </Button>

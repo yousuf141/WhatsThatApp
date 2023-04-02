@@ -4,12 +4,16 @@ import { type NavigationProp } from "@react-navigation/native";
 
 import { View } from "react-native";
 import { Button, Snackbar, TextInput } from "react-native-paper";
-import FormInput from "../../components/forms/FormInput";
+
+import { userService } from "../../services/userService";
+
 import {
   validateEmail,
   validatePassword,
   validateName,
 } from "../../utils/validators";
+
+import FormInput from "../../components/forms/FormInput";
 
 const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   navigation,
@@ -32,7 +36,7 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
 
-  function handleSignUp(): void {
+  async function handleSignUp(): Promise<void> {
     if (
       !isFirstNameValid ||
       !isLastNameValid ||
@@ -43,10 +47,30 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       showSnackbar("Please make sure all fields are valid.");
     }
 
-    // TODO: implement actual sign up
+    const res = await userService.register({
+      firstName,
+      lastName,
+      email,
+      password,
+    });
+    if (!res.success) {
+      if (res.errorCode === 400)
+        showSnackbar("Register failed. Invalid fields.");
+      else showSnackbar("Unknown Error. Please try again.");
+      return;
+    }
+
+    showSnackbar("Account Created!", 900);
+    setTimeout(() => {
+      goToLogin();
+    }, 1000);
   }
 
   function handleGoToLogin(): void {
+    goToLogin();
+  }
+
+  function goToLogin(): void {
     navigation.navigate("LoginSection");
   }
 
@@ -89,25 +113,35 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
           label="Password"
           left={<TextInput.Icon icon={"lock"} />}
           value={password}
+          secureTextEntry
           onChangeText={setPassword}
           error={!isPasswordValid && password.length > 0}
-          errorMessage="Must be longer than 8 chars and contain upper, lower and number
+          errorMessage="Must be longer than 8 chars and contain upper, lower and symbol
             chars."
         />
         <FormInput
           label="Confirm Password"
           left={<TextInput.Icon icon={"lock"} />}
           value={confirmPassword}
+          secureTextEntry
           onChangeText={setConfirmPassword}
           error={!isConfirmPasswordValid && confirmPassword.length > 0}
           errorMessage="Must match password."
         />
       </View>
       <View>
-        <Button mode="contained" onPress={handleSignUp}>
+        <Button
+          style={{ marginBottom: 10, marginHorizontal: 10 }}
+          mode="contained"
+          onPress={() => {
+            void handleSignUp();
+          }}
+        >
           Sign Up
         </Button>
-        <Button onPress={handleGoToLogin}>Login</Button>
+        <Button style={{ marginBottom: 20 }} onPress={handleGoToLogin}>
+          Login
+        </Button>
       </View>
       <Snackbar
         visible={snackbarVisible}

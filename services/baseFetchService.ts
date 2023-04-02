@@ -6,7 +6,9 @@ export interface FetchResult {
 }
 
 export class BaseFetchService {
-  baseUrl = process.env.API_URL ?? `http://localhost:3333/api/1.0.0`;
+  private readonly apiUrl = process.env.API_URL ?? "http://localhost";
+  private readonly apiPort = process.env.API_PORT ?? "3333";
+  readonly baseUrl = `${this.apiUrl}:${this.apiPort}/api/1.0.0`;
 
   defaultHeaders = {
     Accept: "application/json",
