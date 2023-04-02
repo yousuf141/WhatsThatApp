@@ -61,10 +61,16 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
         </View>
       </View>
       <View>
-        <Button mode="contained" onPress={handleLogin}>
+        <Button
+          style={{ marginBottom: 10 }}
+          mode="contained"
+          onPress={handleLogin}
+        >
           Log In
         </Button>
-        <Button onPress={handleGoToSignUp}>Sign Up</Button>
+        <Button style={{ marginBottom: 20 }} onPress={handleGoToSignUp}>
+          Sign Up
+        </Button>
       </View>
       <Snackbar
         visible={snackbarVisible}
