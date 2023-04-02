@@ -1,23 +1,30 @@
-export interface FetchError {
-  errorCode: number;
-  message: string;
+export interface FetchResult {
+  success: boolean;
+  errorCode?: number;
+  message?: string;
+  data?: any;
 }
 
 export class BaseFetchService {
   baseUrl = process.env.API_URL ?? `http://localhost:3333/api/1.0.0`;
 
-  handleError(status: number): FetchError | null {
+  defaultHeaders = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+
+  handleError(status: number): FetchResult | null {
     switch (status) {
       case 400:
-        return { errorCode: 400, message: "Bad Request" };
+        return { success: false, errorCode: 400, message: "Bad Request" };
       case 401:
-        return { errorCode: 401, message: "Unauthorized" };
+        return { success: false, errorCode: 401, message: "Unauthorized" };
       case 403:
-        return { errorCode: 403, message: "Forbidden" };
+        return { success: false, errorCode: 403, message: "Forbidden" };
       case 404:
-        return { errorCode: 404, message: "Not Found" };
+        return { success: false, errorCode: 404, message: "Not Found" };
       case 500:
-        return { errorCode: 500, message: "Server Error" };
+        return { success: false, errorCode: 500, message: "Server Error" };
       default:
         return null;
     }
