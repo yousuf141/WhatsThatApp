@@ -37,7 +37,7 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       return;
     }
 
-    authDispatch({ userId: res.data.id, key: res.data.token });
+    authDispatch({ userId: res.data.userId, key: res.data.key });
   }
 
   function handleGoToSignUp(): void {

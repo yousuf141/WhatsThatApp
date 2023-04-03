@@ -11,7 +11,7 @@ import { type User } from "../../models/user/user";
 const SettingsSection: React.FC = () => {
   const [authState] = useAuth();
 
-  const [profile, setProfile] = React.useState<Partial<User>>({});
+  const [user, setUser] = React.useState<User | null>(null);
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -28,53 +28,52 @@ const SettingsSection: React.FC = () => {
       );
 
       if (!res.success) {
-        if (res.errorCode === 401) {
-          showSnackbar("Unauthorized");
-        } else if (res.errorCode === 404) {
-          showSnackbar("Not found");
-        } else {
-          showSnackbar("Unknown Error");
+        let snackbarMessage: string = "";
+
+        switch (res.errorCode) {
+          case 401:
+            snackbarMessage = "Unauthorized";
+            break;
+          case 404:
+            snackbarMessage = "Not Found";
+            break;
+          default:
+            snackbarMessage = "Unknown Error";
         }
-      } else {
-        setProfile({
-          id: res.data.user_id,
-          firstName: res.data.first_name,
-          lastName: res.data.last_name,
-          email: res.data.email,
-        });
+
+        showSnackbar(snackbarMessage);
+        setIsLoading(false);
+        return;
       }
 
+      setUser(res.data as User);
       setIsLoading(false);
     })();
   }, []);
 
   function renderProfile(): React.ReactNode {
-    let profileElement: React.ReactNode = null;
-
     if (isLoading) {
-      profileElement = (
+      return (
         <ActivityIndicator
           style={{ flex: 1, alignContent: "center" }}
           size="large"
           animating={true}
         />
       );
-    } else {
-      const fullName: string = `${profile?.firstName ?? ""} ${
-        profile?.lastName ?? ""
-      }`;
-
-      profileElement = (
-        <>
-          <Card.Title title={fullName} />
-          <Card.Content>
-            <Text>Email: {profile?.email ?? ""}</Text>
-          </Card.Content>
-        </>
-      );
     }
 
-    return <Card>{profileElement}</Card>;
+    if (user === null) return <></>;
+
+    const fullName: string = `${user.firstName} ${user?.lastName}`;
+
+    return (
+      <>
+        <Card.Title title={fullName} />
+        <Card.Content>
+          <Text>Email: {user.email}</Text>
+        </Card.Content>
+      </>
+    );
   }
 
   function showSnackbar(message: string, time: number = 1500): void {
@@ -87,7 +86,7 @@ const SettingsSection: React.FC = () => {
 
   return (
     <View>
-      {renderProfile()}
+      <Card>{renderProfile()}</Card>
       <Snackbar
         visible={snackbarVisible}
         duration={3000}
