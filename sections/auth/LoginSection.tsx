@@ -77,7 +77,10 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
         >
           Log In
         </Button>
-        <Button style={{ marginBottom: 20 }} onPress={handleGoToSignUp}>
+        <Button
+          style={{ marginBottom: 10, marginHorizontal: 10 }}
+          onPress={handleGoToSignUp}
+        >
           Sign Up
         </Button>
       </View>
