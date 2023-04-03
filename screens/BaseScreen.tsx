@@ -37,7 +37,7 @@ const BaseScreen: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {authState.key === null ? <AuthScreen /> : <HomeScreen />}
+      {authState.userId == null ? <AuthScreen /> : <HomeScreen />}
     </NavigationContainer>
   );
 };

@@ -1,9 +1,6 @@
 export interface Auth {
-  userId: number;
-  key: string | null;
+  userId?: number;
+  key?: string;
 }
 
-export const AUTH_DEFAULT: Auth = {
-  userId: 0,
-  key: null,
-};
+export const AUTH_DEFAULT: Auth = {};
