@@ -3,6 +3,7 @@ import "react-native-gesture-handler";
 
 import { Provider as PaperProvider } from "react-native-paper";
 
+import AlertProvider from "./providers/AlertProvider";
 import AuthProvider from "./providers/AuthProvider";
 
 import BaseScreen from "./screens/BaseScreen";
@@ -10,9 +11,11 @@ import BaseScreen from "./screens/BaseScreen";
 const App: React.FC = () => {
   return (
     <PaperProvider>
-      <AuthProvider>
-        <BaseScreen />
-      </AuthProvider>
+      <AlertProvider>
+        <AuthProvider>
+          <BaseScreen />
+        </AuthProvider>
+      </AlertProvider>
     </PaperProvider>
   );
 };

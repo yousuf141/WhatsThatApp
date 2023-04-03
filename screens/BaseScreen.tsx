@@ -1,5 +1,7 @@
 import React from "react";
 
+import { ActivityIndicator } from "react-native-paper";
+
 import { NavigationContainer } from "@react-navigation/native";
 
 import { useAuth } from "../providers/AuthProvider";
@@ -7,7 +9,8 @@ import { useAuth } from "../providers/AuthProvider";
 import AuthScreen from "./AuthScreen";
 import HomeScreen from "./HomeScreen";
 import { getStorageObject } from "../utils/storage";
-import { ActivityIndicator } from "react-native-paper";
+
+import SnackBar from "../components/Snackbar";
 
 const BaseScreen: React.FC = () => {
   const [authState, authDispatch] = useAuth();
@@ -38,6 +41,7 @@ const BaseScreen: React.FC = () => {
   return (
     <NavigationContainer>
       {authState.userId == null ? <AuthScreen /> : <HomeScreen />}
+      <SnackBar />
     </NavigationContainer>
   );
 };

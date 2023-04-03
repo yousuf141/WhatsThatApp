@@ -3,7 +3,9 @@ import React from "react";
 import { type NavigationProp } from "@react-navigation/native";
 
 import { View } from "react-native";
-import { Button, Snackbar, TextInput } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
+
+import { useSnackbar } from "../../hooks/useSnackbar";
 
 import { userService } from "../../services/userService";
 
@@ -18,6 +20,8 @@ import FormInput from "../../components/forms/FormInput";
 const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   navigation,
 }) => {
+  const snackbar = useSnackbar();
+
   const [firstName, setFirstName] = React.useState<string>("");
   const isFirstNameValid = validateName(firstName);
 
@@ -33,9 +37,6 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   const [confirmPassword, setConfirmPassword] = React.useState<string>("");
   const isConfirmPasswordValid = confirmPassword === password;
 
-  const [snackbarVisible, setSnackbarVisible] = React.useState<boolean>(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
-
   async function handleSignUp(): Promise<void> {
     if (
       !isFirstNameValid ||
@@ -44,7 +45,7 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       !isPasswordValid ||
       !isConfirmPasswordValid
     ) {
-      showSnackbar("Please make sure all fields are valid.");
+      snackbar.show("Please make sure all fields are valid.");
     }
 
     const res = await userService.register({
@@ -54,13 +55,15 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       password,
     });
     if (!res.success) {
-      if (res.errorCode === 400)
-        showSnackbar("Register failed. Invalid fields.");
-      else showSnackbar("Unknown Error. Please try again.");
+      if (res.errorCode === 400) {
+        snackbar.show("Register failed. Invalid fields.");
+      } else {
+        snackbar.show("Unknown Error. Please try again.");
+      }
       return;
     }
 
-    showSnackbar("Account Created!", 900);
+    snackbar.show("Account Created!");
     setTimeout(() => {
       goToLogin();
     }, 1000);
@@ -72,14 +75,6 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
 
   function goToLogin(): void {
     navigation.navigate("LoginSection");
-  }
-
-  function showSnackbar(message: string, time: number = 1500): void {
-    setSnackbarMessage(message);
-    setSnackbarVisible(true);
-    setTimeout(() => {
-      setSnackbarVisible(false);
-    }, time);
   }
 
   return (
@@ -143,17 +138,7 @@ const SignUpSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
           Login
         </Button>
       </View>
-      <Snackbar
-        visible={snackbarVisible}
-        duration={3000}
-        onDismiss={() => {
-          setSnackbarVisible(false);
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar>
     </View>
   );
 };
-
 export default SignUpSection;
