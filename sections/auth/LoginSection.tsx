@@ -69,7 +69,7 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       </View>
       <View>
         <Button
-          style={{ marginBottom: 10, marginHorizontal: 10 }}
+          style={{ margin: 5 }}
           mode="contained"
           onPress={() => {
             void handleLogin();
@@ -77,10 +77,7 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
         >
           Log In
         </Button>
-        <Button
-          style={{ marginBottom: 10, marginHorizontal: 10 }}
-          onPress={handleGoToSignUp}
-        >
+        <Button style={{ margin: 5 }} onPress={handleGoToSignUp}>
           Sign Up
         </Button>
       </View>
