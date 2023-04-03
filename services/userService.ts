@@ -1,3 +1,4 @@
+import { type File } from "buffer";
 import { type User } from "../models/user/user";
 import { type UserPost } from "../models/user/userPost";
 import { BaseFetchService, type FetchResult } from "./baseFetchService";
@@ -137,15 +138,16 @@ class UserService extends BaseFetchService {
 
   async uploadPhotoById(
     id: number,
-    photo: Blob,
+    blob: Blob,
+    fileType: string,
     authKey: string
   ): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${id}/photo`, {
         method: "POST",
-        body: photo,
+        body: blob,
         headers: {
-          Accept: "image/png, image/jpeg",
+          "Content-Type": fileType,
           "X-Authorization": authKey,
         },
       });

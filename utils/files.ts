@@ -8,3 +8,9 @@ export async function blobToBase64(blob: Blob): Promise<string | ArrayBuffer> {
     reader.readAsDataURL(blob);
   });
 }
+
+export async function uriToBlob(uri: string): Promise<Blob> {
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  return blob;
+}
