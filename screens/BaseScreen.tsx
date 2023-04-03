@@ -1,7 +1,5 @@
 import React from "react";
 
-import { ActivityIndicator } from "react-native-paper";
-
 import { NavigationContainer } from "@react-navigation/native";
 
 import { useAuth } from "../providers/AuthProvider";
@@ -11,6 +9,7 @@ import HomeScreen from "./HomeScreen";
 import { getStorageObject } from "../utils/storage";
 
 import SnackBar from "../components/Snackbar";
+import Loading from "../components/Loading";
 
 const BaseScreen: React.FC = () => {
   const [authState, authDispatch] = useAuth();
@@ -28,15 +27,7 @@ const BaseScreen: React.FC = () => {
     })();
   }, []);
 
-  if (isLoading) {
-    return (
-      <ActivityIndicator
-        style={{ flex: 1, alignContent: "center" }}
-        size="large"
-        animating={true}
-      />
-    );
-  }
+  if (isLoading) return <Loading />;
 
   return (
     <NavigationContainer>
