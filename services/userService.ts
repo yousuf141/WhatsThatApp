@@ -18,7 +18,7 @@ class UserService extends BaseFetchService {
       if (error != null) return error;
 
       const data = await res.json();
-      return { success: true, data };
+      return { success: true, data: { userId: data.id, key: data.token } };
     } catch (e) {
       console.error(e);
       return { success: false, message: "Unknown Error" };
@@ -58,7 +58,12 @@ class UserService extends BaseFetchService {
       if (error != null) return error;
 
       const data = await res.json();
-      return { success: true, data };
+      return {
+        success: true,
+        data: {
+          userId: data.user_id,
+        },
+      };
     } catch (e) {
       console.error(e);
       return { success: false, message: "Unknown Error" };
@@ -76,7 +81,15 @@ class UserService extends BaseFetchService {
       if (error != null) return error;
 
       const data = await res.json();
-      return { success: true, data };
+      return {
+        success: true,
+        data: {
+          id: data.user_id,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          email: data.email,
+        } satisfies User,
+      };
     } catch (e) {
       console.error(e);
       return { success: false, message: "Unknown Error" };
@@ -87,7 +100,7 @@ class UserService extends BaseFetchService {
     try {
       const res = await fetch(this.baseUrl + `/user/${user.id}`, {
         method: "PATCH",
-        body: JSON.stringify(user),
+        body: JSON.stringify({ ...user, id: undefined }),
         headers: { ...this.defaultHeaders, "X-Authorization": authKey },
       });
 
