@@ -65,11 +65,11 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async getById(id: number): Promise<FetchResult> {
+  async getById(id: number, authKey: string): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${id}`, {
         method: "GET",
-        headers: this.defaultHeaders,
+        headers: { ...this.defaultHeaders, "X-Authorization": authKey },
       });
 
       const error = this.handleError(res.status);
@@ -83,12 +83,12 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async update(user: User): Promise<FetchResult> {
+  async update(user: User, authKey: string): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${user.id}`, {
         method: "PATCH",
         body: JSON.stringify(user),
-        headers: this.defaultHeaders,
+        headers: { ...this.defaultHeaders, "X-Authorization": authKey },
       });
 
       const error = this.handleError(res.status);
@@ -101,12 +101,13 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async getPhotoById(id: number): Promise<FetchResult> {
+  async getPhotoById(id: number, authKey: string): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${id}/photo`, {
         method: "GET",
         headers: {
           Accept: "image/png, image/jpeg",
+          "X-Authorization": authKey,
         },
       });
 
@@ -121,13 +122,18 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async uploadPhotoById(id: number, photo: Blob): Promise<FetchResult> {
+  async uploadPhotoById(
+    id: number,
+    photo: Blob,
+    authKey: string
+  ): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${id}/photo`, {
         method: "POST",
         body: photo,
         headers: {
           Accept: "image/png, image/jpeg",
+          "X-Authorization": authKey,
         },
       });
 
