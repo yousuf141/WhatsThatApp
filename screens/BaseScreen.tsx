@@ -12,7 +12,7 @@ import SnackBar from "../components/Snackbar";
 import Loading from "../components/Loading";
 
 const BaseScreen: React.FC = () => {
-  const [authState, authDispatch] = useAuth();
+  const [auth, authDispatch] = useAuth();
 
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -31,7 +31,7 @@ const BaseScreen: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {authState.userId == null ? <AuthScreen /> : <HomeScreen />}
+      {auth.userId == null ? <AuthScreen /> : <HomeScreen />}
       <SnackBar />
     </NavigationContainer>
   );
