@@ -113,8 +113,8 @@ const UpdateProfileInfoModal: React.FC<UpdateProfileInfoModalProps> = ({
         visible={visible}
         onDismiss={hide}
         contentContainerStyle={{
-          margin: 5,
           backgroundColor: DefaultTheme.colors.background,
+          margin: 5,
           borderRadius: 10,
         }}
       >
