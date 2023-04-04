@@ -11,7 +11,11 @@ import { useSnackbar } from "../../hooks/useSnackbar";
 import { userService } from "../../services/userService";
 import { uriToBlob } from "../../utils/files";
 
-const ProfileActions: React.FC = () => {
+interface ProfileActionsProps {
+  refresh: () => void;
+}
+
+const ProfileActions: React.FC<ProfileActionsProps> = ({ refresh }) => {
   const [auth, authDispatch] = useAuth();
   const snackbar = useSnackbar();
 
@@ -66,9 +70,10 @@ const ProfileActions: React.FC = () => {
         default:
           snackbar.show("Error: Unknown Error.");
       }
-    } else {
-      snackbar.show("Successfully updated your profile photo!");
+      return;
     }
+    snackbar.show("Successfully updated your profile photo!");
+    refresh();
   }
 
   function handleLogout(): void {
