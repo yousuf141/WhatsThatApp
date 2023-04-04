@@ -12,15 +12,16 @@ import { userService } from "../../services/userService";
 import { uriToBlob } from "../../utils/files";
 
 interface ProfileActionsProps {
+  onEdit: () => void;
   refresh: () => void;
 }
 
-const ProfileActions: React.FC<ProfileActionsProps> = ({ refresh }) => {
+const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
   const [auth, authDispatch] = useAuth();
   const snackbar = useSnackbar();
 
   function handleUpdateInfo(): void {
-    // TODO: implement updating of users info. another screen needed?
+    onEdit();
   }
 
   async function handleUpdatePhoto(): Promise<void> {
