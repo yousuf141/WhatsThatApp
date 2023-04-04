@@ -97,11 +97,20 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async update(user: User, authKey: string): Promise<FetchResult> {
+  async update(
+    user: User,
+    password: string | null,
+    authKey: string
+  ): Promise<FetchResult> {
     try {
       const res = await fetch(this.baseUrl + `/user/${user.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ ...user, id: undefined }),
+        body: JSON.stringify({
+          first_name: user.firstName,
+          last_name: user.lastName,
+          email: user.email,
+          password: password ?? "",
+        }),
         headers: { ...this.defaultHeaders, "X-Authorization": authKey },
       });
 

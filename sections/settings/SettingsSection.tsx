@@ -16,12 +16,18 @@ import UpdateProfileInfoModal from "../../components/modals/UpdateProfileInfoMod
 const SettingsSection: React.FC = () => {
   const [auth] = useAuth();
 
-  const { shouldRefresh, refresh } = useRefresh();
+  const imageRefresh = useRefresh();
+  const profileImage = useProfileImage(
+    auth.userId as number,
+    imageRefresh.shouldRefresh
+  );
 
-  const profileImage = useProfileImage(auth.userId as number, shouldRefresh);
-
-  const profileInfo = useProfileInfo(auth.userId as number, shouldRefresh);
   const updateProfileInfoModal = useModal();
+  const infoRefresh = useRefresh();
+  const profileInfo = useProfileInfo(
+    auth.userId as number,
+    infoRefresh.shouldRefresh
+  );
 
   function renderUpdateProfileInfoModal(): React.ReactNode {
     if (profileInfo.user == null) return <></>;
@@ -30,6 +36,7 @@ const SettingsSection: React.FC = () => {
       <UpdateProfileInfoModal
         visible={updateProfileInfoModal.visible}
         hide={updateProfileInfoModal.hide}
+        refresh={infoRefresh.refresh}
         user={profileInfo.user}
       />
     );
@@ -39,7 +46,10 @@ const SettingsSection: React.FC = () => {
     <View style={{ flex: 1 }}>
       <ProfileImage uri={profileImage.uri} loading={profileImage.loading} />
       <ProfileInfo user={profileInfo.user} loading={profileInfo.loading} />
-      <ProfileActions refresh={refresh} onEdit={updateProfileInfoModal.show} />
+      <ProfileActions
+        refresh={imageRefresh.refresh}
+        onEdit={updateProfileInfoModal.show}
+      />
       {renderUpdateProfileInfoModal()}
     </View>
   );
