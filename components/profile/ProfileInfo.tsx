@@ -1,56 +1,17 @@
 import React from "react";
 import { Divider, List, Text } from "react-native-paper";
 
-import { useAuth } from "../../providers/AuthProvider";
-
-import { useSnackbar } from "../../hooks/useSnackbar";
-
-import { userService } from "../../services/userService";
-
 import { type User } from "../../models/user/user";
 
 import Loading from "../../components/Loading";
 
-const ProfileInfo: React.FC = () => {
-  const [auth, authDispatch] = useAuth();
-  const snackbar = useSnackbar();
+interface ProfileInfoProps {
+  user: User | null;
+  loading: boolean;
+}
 
-  const [user, setUser] = React.useState<User | null>(null);
-
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    void (async () => {
-      setIsLoading(true);
-
-      setUser(await getUserInfo());
-
-      setIsLoading(false);
-    })();
-  }, []);
-
-  async function getUserInfo(): Promise<User | null> {
-    const res = await userService.getById(
-      auth.userId as number,
-      auth.key as string
-    );
-    if (!res.success) {
-      switch (res.errorCode) {
-        case 401:
-          authDispatch({ userId: undefined, key: undefined });
-          break;
-        case 404:
-          snackbar.show("Error: could not find profile.");
-          break;
-        default:
-          snackbar.show("Unknown Error");
-      }
-      return null;
-    }
-    return res.data as User;
-  }
-
-  if (isLoading) return <Loading />;
+const ProfileInfo: React.FC<ProfileInfoProps> = ({ user, loading }) => {
+  if (loading) return <Loading />;
 
   if (user == null)
     return <Text>Failed to get user profile. Please try again.</Text>;
