@@ -1,4 +1,3 @@
-import { type File } from "buffer";
 import { type User } from "../models/user/user";
 import { type UserPost } from "../models/user/userPost";
 import { BaseFetchService, type FetchResult } from "./baseFetchService";
