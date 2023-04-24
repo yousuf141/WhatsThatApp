@@ -82,15 +82,15 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
   }
 
   function getFileTypeFromUri(uri: string): string | null {
-    const type: string = uri.substring(uri.lastIndexOf(".") + 1, uri.length);
-    if (type == null) return null;
+    const data: string = uri.split(";")[0];
+    if (data == null) return null;
 
-    switch (type.toLowerCase()) {
-      case "jpg":
-      case "jpeg":
-        return "image/jpeg";
-      case "png":
-        return "image/png";
+    const fileType: string = data.split("data:")[1] ?? null;
+    switch (fileType) {
+      case "image/png":
+      case "image/jpg":
+      case "image/jpeg":
+        return fileType;
       default:
         return null;
     }
