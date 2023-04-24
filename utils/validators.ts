@@ -1,6 +1,7 @@
+import * as EmailValidator from "email-validator";
+
 export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return EmailValidator.validate(email);
 };
 
 export const validatePassword = (password: string): boolean => {
