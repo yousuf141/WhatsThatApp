@@ -82,18 +82,37 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
   }
 
   function getFileTypeFromUri(uri: string): string | null {
-    const data: string = uri.split(";")[0];
-    if (data == null) return null;
+    let data: string = "";
 
-    const fileType: string = data.split("data:")[1] ?? null;
-    switch (fileType) {
-      case "image/png":
-      case "image/jpg":
-      case "image/jpeg":
-        return fileType;
-      default:
-        return null;
+    if (uri.startsWith("data")) {
+      // filter for web
+      data = uri.split(";")[0];
+
+      const fileType: string = data.split("data:")[1] ?? null;
+      switch (fileType) {
+        case "image/png":
+        case "image/jpg":
+        case "image/jpeg":
+          return fileType;
+        default:
+          return null;
+      }
+    } else if (uri.startsWith("file")) {
+      // filter for mobile
+      const fileType = uri.substring(uri.lastIndexOf(".") + 1);
+
+      switch (fileType) {
+        case "png":
+          return "image/png";
+        case "jpg":
+          return "image/jpg";
+        case "jpeg":
+          return "image/jpeg";
+        default:
+          return null;
+      }
     }
+    return null;
   }
 
   return (
