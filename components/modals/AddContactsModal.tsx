@@ -1,9 +1,11 @@
 import React from "react";
-import { FlatList } from "react-native";
+import { FlatList, View } from "react-native";
 
 import {
+  Button,
   DefaultTheme,
   Divider,
+  List,
   Modal,
   Portal,
   Searchbar,
@@ -12,22 +14,23 @@ import {
 import { type User } from "../../models/user/user";
 
 import { useAuth } from "../../providers/AuthProvider";
-
 import { useSnackbar } from "../../hooks/useSnackbar";
 
 import { userService } from "../../services/userService";
+import { contactService } from "../../services/contactService";
 
-import Contact from "../contact/Contact";
 import Loading from "../Loading";
 
 interface AddContactModalProps {
   visible: boolean;
   hide: () => void;
+  refresh: () => void;
 }
 
 const AddContactsModal: React.FC<AddContactModalProps> = ({
   visible,
   hide,
+  refresh,
 }) => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
@@ -45,7 +48,11 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
     const x = setTimeout(() => {
       void (async () => {
         setLoading(true);
-        const res = await userService.search(searchQuery, auth.key as string);
+        const res = await userService.search(
+          searchQuery,
+          {},
+          auth.key as string
+        );
         if (!res.success) {
           snackbar.show("Error: Failed to get users");
           setLoading(false);
@@ -66,6 +73,17 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
     setSearchQuery(e);
   }
 
+  async function handleAddContact(user: User): Promise<void> {
+    const res = await contactService.addById(user.id, auth.key as string);
+    if (!res.success) {
+      snackbar.show("Failed to add the user to your contact");
+    } else {
+      snackbar.show("Add user to your contacts!");
+    }
+    hide();
+    refresh();
+  }
+
   function renderUsers(): React.ReactNode {
     if (loading) return <Loading />;
 
@@ -75,8 +93,28 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
         renderItem={({ item }) => {
           return (
             <>
-              <Contact user={item} />
-              <Divider />
+              {item.id === auth.userId ? ( // dont render self
+                <></>
+              ) : (
+                <>
+                  <View style={{ flex: 1, flexDirection: "row" }}>
+                    <List.Item
+                      style={{ flex: 0.75 }}
+                      title={`${item.firstName} ${item.lastName}`}
+                      description={item.email}
+                    />
+                    <Button
+                      style={{ flex: 0.2, alignSelf: "center" }}
+                      onPress={function () {
+                        void handleAddContact(item);
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </View>
+                  <Divider />
+                </>
+              )}
             </>
           );
         }}
