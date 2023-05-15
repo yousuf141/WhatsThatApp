@@ -3,11 +3,11 @@ import { BaseFetchService, type FetchResult } from "./baseFetchService";
 
 class ContactService extends BaseFetchService {
   async getAll(authKey: string): Promise<FetchResult> {
-    return await this.getContact(this.baseUrl + "/contacts", authKey);
+    return await this.getContacts(this.baseUrl + "/contacts", authKey);
   }
 
   async getAllBlocked(authKey: string): Promise<FetchResult> {
-    return await this.getContact(this.baseUrl + "/blocked", authKey);
+    return await this.getContacts(this.baseUrl + "/blocked", authKey);
   }
 
   async addById(userId: number, authKey: string): Promise<FetchResult> {
@@ -41,7 +41,7 @@ class ContactService extends BaseFetchService {
     );
   }
 
-  async getContact(endpoint: string, authKey: string): Promise<FetchResult> {
+  async getContacts(endpoint: string, authKey: string): Promise<FetchResult> {
     try {
       const res = await fetch(endpoint, {
         method: "GET",
@@ -61,7 +61,7 @@ class ContactService extends BaseFetchService {
 
       return {
         success: true,
-        data: contacts,
+        data: contacts satisfies Contact[],
       };
     } catch (e) {
       console.error(e);
@@ -104,4 +104,4 @@ class ContactService extends BaseFetchService {
   }
 }
 
-export const contactServie = new ContactService();
+export const contactService = new ContactService();

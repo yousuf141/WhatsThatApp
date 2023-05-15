@@ -15,14 +15,14 @@ const ContactsSection: React.FC = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <AddContactsModal
-        visible={addContactsModal.visible}
-        hide={addContactsModal.hide}
-      />
       <FAB
         icon="plus"
         style={{ position: "absolute", bottom: 10, right: 10 }}
         onPress={handleAddContacts}
+      />
+      <AddContactsModal
+        visible={addContactsModal.visible}
+        hide={addContactsModal.hide}
       />
     </View>
   );

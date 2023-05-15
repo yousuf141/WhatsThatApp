@@ -170,6 +170,32 @@ class UserService extends BaseFetchService {
       return { success: false, message: "Unknown Error" };
     }
   }
+
+  async search(query: string, authKey: string): Promise<FetchResult> {
+    try {
+      const res = await fetch(this.baseUrl + `/search?q=${query}`, {
+        method: "GET",
+        headers: {
+          "X-Authorization": authKey,
+        },
+      });
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      const data = await res.json();
+      const users: User[] = data.map((x: any) => ({
+        id: x.user_id,
+        firstName: x.given_name,
+        lastName: x.family_name,
+        email: x.email,
+      }));
+      return { success: true, data: users };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
 }
 
 export const userService = new UserService();

@@ -1,4 +1,5 @@
 import React from "react";
+import { FlatList } from "react-native";
 
 import {
   DefaultTheme,
@@ -10,9 +11,14 @@ import {
 
 import { type User } from "../../models/user/user";
 
-import Loading from "../Loading";
-import { FlatList } from "react-native-gesture-handler";
+import { useAuth } from "../../providers/AuthProvider";
+
+import { useSnackbar } from "../../hooks/useSnackbar";
+
+import { userService } from "../../services/userService";
+
 import Contact from "../contact/Contact";
+import Loading from "../Loading";
 
 interface AddContactModalProps {
   visible: boolean;
@@ -23,34 +29,41 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
   visible,
   hide,
 }) => {
+  const [auth] = useAuth();
+  const snackbar = useSnackbar();
+
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [users, setUsers] = React.useState<User[]>([
-    { id: 1, firstName: "a", lastName: "b", email: "a@e" },
-    { id: 2, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 3, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 4, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 5, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 6, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 7, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 8, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 9, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 10, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 11, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 12, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 13, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 14, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 15, firstName: "b", lastName: "c", email: "b@c" },
-    { id: 16, firstName: "b", lastName: "c", email: "b@c" },
-  ]);
+  const [users, setUsers] = React.useState<User[]>([]);
 
   const [loading, setLoading] = React.useState(false);
 
-  async function handleSearchChange(): Promise<void> {
-    setLoading(true);
+  React.useEffect(() => {
+    if (!visible) setSearchQuery("");
+  }, [visible]);
 
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+  React.useEffect(() => {
+    const x = setTimeout(() => {
+      void (async () => {
+        setLoading(true);
+        const res = await userService.search(searchQuery, auth.key as string);
+        if (!res.success) {
+          snackbar.show("Error: Failed to get users");
+          setLoading(false);
+          return;
+        }
+        setUsers(res.data as User[]);
+
+        setLoading(false);
+      })();
+    }, 500);
+
+    return () => {
+      clearTimeout(x);
+    };
+  }, [searchQuery]);
+
+  async function handleSearchChange(e: string): Promise<void> {
+    setSearchQuery(e);
   }
 
   function renderUsers(): React.ReactNode {
@@ -86,8 +99,8 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
       >
         <Searchbar
           placeholder="Search"
-          onChangeText={() => {
-            void handleSearchChange();
+          onChangeText={(e) => {
+            void handleSearchChange(e);
           }}
           autoFocus={true}
           value={searchQuery}
