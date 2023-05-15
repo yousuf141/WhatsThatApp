@@ -39,7 +39,6 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
   const [users, setUsers] = React.useState<User[]>([]);
 
   const [loading, setLoading] = React.useState(false);
-
   React.useEffect(() => {
     if (!visible) setSearchQuery("");
   }, [visible]);
@@ -48,11 +47,7 @@ const AddContactsModal: React.FC<AddContactModalProps> = ({
     const x = setTimeout(() => {
       void (async () => {
         setLoading(true);
-        const res = await userService.search(
-          searchQuery,
-          {},
-          auth.key as string
-        );
+        const res = await userService.search(searchQuery, auth.key as string);
         if (!res.success) {
           snackbar.show("Error: Failed to get users");
           setLoading(false);
