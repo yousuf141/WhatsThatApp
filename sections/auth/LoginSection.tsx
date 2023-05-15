@@ -12,6 +12,7 @@ import { validateEmail } from "../../utils/validators";
 
 import FormInput from "../../components/forms/FormInput";
 import { useSnackbar } from "../../hooks/useSnackbar";
+import { setStorageObject } from "../../utils/storage";
 
 const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
   navigation,
@@ -39,7 +40,9 @@ const LoginSection: React.FC<{ navigation: NavigationProp<any, any> }> = ({
       return;
     }
 
-    authDispatch({ userId: res.data.userId, key: res.data.key });
+    const newAuthState = { userId: res.data.userId, key: res.data.key };
+    await setStorageObject("auth", newAuthState);
+    authDispatch(newAuthState);
   }
 
   function handleGoToSignUp(): void {
