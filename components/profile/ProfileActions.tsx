@@ -6,10 +6,12 @@ import * as ImagePicker from "expo-image-picker";
 
 import { useAuth } from "../../providers/AuthProvider";
 
+import { useModal } from "../../hooks/useModal";
 import { useSnackbar } from "../../hooks/useSnackbar";
 
 import { userService } from "../../services/userService";
 import { uriToBlob } from "../../utils/files";
+import TakePhotoModal from "../modals/TakePhotoModal";
 
 interface ProfileActionsProps {
   onEdit: () => void;
@@ -20,11 +22,13 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
   const [auth, authDispatch] = useAuth();
   const snackbar = useSnackbar();
 
+  const takePhotoModal = useModal();
+
   function handleUpdateInfo(): void {
     onEdit();
   }
 
-  async function handleUpdatePhoto(): Promise<void> {
+  async function handleUploadPhoto(): Promise<void> {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -40,6 +44,48 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
       return;
     }
 
+    const fileType = getFileTypeFromUri(uri);
+    if (fileType == null) {
+      snackbar.show("Error: Invalid file type.");
+      return;
+    }
+
+    const fileBlob = await uriToBlob(uri);
+
+    const res = await userService.uploadPhotoById(
+      auth.userId as number,
+      fileBlob,
+      fileType,
+      auth.key as string
+    );
+    if (!res.success) {
+      switch (res.errorCode) {
+        case 400:
+          snackbar.show("Error: Invalid file.");
+          break;
+        case 401:
+          handleLogout();
+          break;
+        case 403:
+          snackbar.show("Error: You do not have permission to upload.");
+          break;
+        case 404:
+          snackbar.show("Error: The user was not found.");
+          break;
+        default:
+          snackbar.show("Error: Unknown Error.");
+      }
+      return;
+    }
+    snackbar.show("Successfully updated your profile photo!");
+    refresh();
+  }
+
+  function handleTakePhoto(): void {
+    takePhotoModal.show();
+  }
+
+  async function handleModalUpload(uri: string): Promise<void> {
     const fileType = getFileTypeFromUri(uri);
     if (fileType == null) {
       snackbar.show("Error: Invalid file type.");
@@ -129,10 +175,13 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
           style={{ margin: 5 }}
           mode="outlined"
           onPress={() => {
-            void handleUpdatePhoto();
+            void handleUploadPhoto();
           }}
         >
-          Update Photo
+          Upload Photo
+        </Button>
+        <Button style={{ margin: 5 }} mode="outlined" onPress={handleTakePhoto}>
+          Take a Photo
         </Button>
       </View>
       <View>
@@ -144,6 +193,13 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({ onEdit, refresh }) => {
           Log Out
         </Button>
       </View>
+      <TakePhotoModal
+        visible={takePhotoModal.visible}
+        hide={takePhotoModal.hide}
+        updatePhoto={(uri) => {
+          void handleModalUpload(uri);
+        }}
+      />
     </View>
   );
 };
