@@ -16,7 +16,7 @@ import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
 
 import { useUserSearch } from "../../hooks/useUserSearch";
-import { useContactSearch } from "../../hooks/useContactSearch";
+import { useContactSearch } from "../../hooks/contact/useContactSearch";
 import { useBlockedSearch } from "../../hooks/useBlockedSearch";
 
 import { contactService } from "../../services/contactService";
