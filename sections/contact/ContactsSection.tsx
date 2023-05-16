@@ -14,8 +14,10 @@ import { type User } from "../../models/user/user";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
+
 import { useUserSearch } from "../../hooks/useUserSearch";
 import { useContactSearch } from "../../hooks/useContactSearch";
+import { useBlockedSearch } from "../../hooks/useBlockedSearch";
 
 import { contactService } from "../../services/contactService";
 
@@ -29,6 +31,22 @@ const ContactsSection: React.FC = () => {
   const [timedQuery, setTimedQuery] = React.useState("");
   const queryTimeRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  // contact states
+  const [contactSearchRefresh, setContactSearchRefresh] = React.useState(false);
+  const contactSearch = useContactSearch(
+    contactSearchRefresh,
+    auth.key as string
+  );
+
+  // blocked users states
+  const [onlyBlocked, setOnlyBlocked] = React.useState(false);
+
+  const [blockedSearchRefresh, setBlockedSearchRefresh] = React.useState(false);
+  const blockedSearch = useBlockedSearch(
+    blockedSearchRefresh,
+    auth.key as string
+  );
+
   // user search states
   const [query, setQuery] = React.useState("");
   const [searchIn, setSearchIn] = React.useState<"all" | "contacts">("all");
@@ -39,10 +57,6 @@ const ContactsSection: React.FC = () => {
     { query, searchIn, limit, offset },
     auth.key as string
   );
-
-  // contact states
-  const [contactRefresh, setContactRefresh] = React.useState(false);
-  const contactSearch = useContactSearch(contactRefresh, auth.key as string);
 
   React.useEffect(() => {
     if (userSearch.error) snackbar.show(`Error: ${userSearch.errorMessage}`);
@@ -73,7 +87,7 @@ const ContactsSection: React.FC = () => {
     if (!res.success) {
       snackbar.show("Error: Failed to add to contact");
     } else {
-      setContactRefresh((x) => !x);
+      setContactSearchRefresh((x) => !x);
     }
   }
 
@@ -82,7 +96,25 @@ const ContactsSection: React.FC = () => {
     if (!res.success) {
       snackbar.show("Error: Failed to delete contact");
     } else {
-      setContactRefresh((x) => !x);
+      setContactSearchRefresh((x) => !x);
+    }
+  }
+
+  async function handleBlockContact(id: number): Promise<void> {
+    const res = await contactService.addBlockedById(id, auth.key as string);
+    if (!res.success) {
+      snackbar.show("Error: Failed to block contact");
+    } else {
+      setBlockedSearchRefresh((x) => !x);
+    }
+  }
+
+  async function handleUnblockContact(id: number): Promise<void> {
+    const res = await contactService.deleteBlockedById(id, auth.key as string);
+    if (!res.success) {
+      snackbar.show("Error: Failed to unblock contact");
+    } else {
+      setBlockedSearchRefresh((x) => !x);
     }
   }
 
@@ -104,8 +136,14 @@ const ContactsSection: React.FC = () => {
           data={userSearch.users}
           renderItem={({ item }) => {
             if (item.id === auth.userId) return <></>;
+            if (onlyBlocked) {
+              const isBlocked =
+                blockedSearch.users.findIndex((x) => x.id === item.id) !== -1;
+              if (!isBlocked) return <></>;
+            }
+
             return (
-              <>
+              <View key={item.id}>
                 <View
                   style={{
                     flex: 1,
@@ -128,7 +166,7 @@ const ContactsSection: React.FC = () => {
                   </View>
                 </View>
                 <Divider />
-              </>
+              </View>
             );
           }}
         />
@@ -145,6 +183,23 @@ const ContactsSection: React.FC = () => {
             style={{ alignSelf: "center" }}
             value={searchIn === "contacts"}
             onValueChange={handleContactSwitchChange}
+          />
+        </View>
+        <View
+          style={{
+            marginTop: 10,
+            padding: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text variant="bodyLarge">Show Only Blocked</Text>
+          <Switch
+            style={{ alignSelf: "center" }}
+            value={onlyBlocked}
+            onValueChange={() => {
+              setOnlyBlocked((x) => !x);
+            }}
           />
         </View>
         <Text variant="labelSmall" style={{ textAlign: "center" }}>
@@ -222,8 +277,33 @@ const ContactsSection: React.FC = () => {
 
     let blockOrUnblockButton: JSX.Element = <></>;
 
-    if (!isContact) {
-      blockOrUnblockButton = <Button mode="outlined">Block</Button>;
+    if (isContact) {
+      const isBlocked =
+        blockedSearch.users.findIndex((x) => x.id === user.id) !== -1;
+
+      if (isBlocked) {
+        blockOrUnblockButton = (
+          <Button
+            mode="outlined"
+            onPress={() => {
+              void handleUnblockContact(user.id);
+            }}
+          >
+            Unblock
+          </Button>
+        );
+      } else {
+        blockOrUnblockButton = (
+          <Button
+            mode="outlined"
+            onPress={() => {
+              void handleBlockContact(user.id);
+            }}
+          >
+            Block
+          </Button>
+        );
+      }
     }
 
     return (
