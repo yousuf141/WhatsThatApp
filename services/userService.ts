@@ -181,8 +181,8 @@ class UserService extends BaseFetchService {
     try {
       const url = new URL(this.baseUrl + "/search");
 
-      url.searchParams.append("query", query);
-      url.searchParams.append("searchIn", searchIn);
+      url.searchParams.append("q", query);
+      url.searchParams.append("search_in", searchIn);
       url.searchParams.append("limit", limit.toString());
       url.searchParams.append("offset", offset.toString());
 

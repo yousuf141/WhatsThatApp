@@ -30,6 +30,9 @@ const ContactsSection: React.FC = () => {
   const [limit, setLimit] = React.useState(5);
   const [offset, setOffset] = React.useState(0);
 
+  const [timedQuery, setTimedQuery] = React.useState("");
+  const queryTimeRef = React.useRef<NodeJS.Timeout | null>(null);
+
   const { loading, error, errorMessage, users, hasMore } = useUserSearch(
     { query, searchIn, limit, offset },
     auth.key as string
@@ -38,6 +41,14 @@ const ContactsSection: React.FC = () => {
   React.useEffect(() => {
     if (error) snackbar.show(`Error: ${errorMessage}`);
   }, [errorMessage]);
+
+  React.useEffect(() => {
+    if (queryTimeRef.current != null) clearTimeout(queryTimeRef.current);
+    queryTimeRef.current = setTimeout(() => {
+      console.log(timedQuery);
+      setQuery(timedQuery);
+    }, 500);
+  }, [timedQuery]);
 
   function handlePageBack(): void {
     setOffset((x) => x - 1);
@@ -64,7 +75,6 @@ const ContactsSection: React.FC = () => {
 
     return (
       <View>
-        <Searchbar value={query} />
         <FlatList
           style={{ marginVertical: 10 }}
           data={users}
@@ -165,6 +175,13 @@ const ContactsSection: React.FC = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: "space-between" }}>
+      <Searchbar
+        placeholder="Search Users"
+        value={timedQuery}
+        onChangeText={(x) => {
+          setTimedQuery(x);
+        }}
+      />
       <ScrollView>{renderUsers()}</ScrollView>
       <View>{renderActions()}</View>
     </View>
