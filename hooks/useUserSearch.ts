@@ -1,18 +1,13 @@
 import React from "react";
 
-import { type UserSearchArgs } from "../types/search/UserSearchArgs";
+import {
+  type useUserSearchResponse,
+  type UserSearchArgs,
+} from "../types/search/user/UserSearch";
 
 import { type User } from "../models/user/user";
 
 import { userService } from "../services/userService";
-
-interface useUserSearchResponse {
-  loading: boolean;
-  error: boolean;
-  errorMessage: string;
-  users: User[];
-  hasMore: boolean;
-}
 
 export const useUserSearch = (
   { query = "", searchIn = "all", limit = 20, offset = 0 }: UserSearchArgs,

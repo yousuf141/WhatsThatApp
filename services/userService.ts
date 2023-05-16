@@ -1,4 +1,4 @@
-import { type UserSearchArgs } from "../types/search/UserSearchArgs";
+import { type UserSearchArgs } from "../types/search/user/UserSearch";
 
 import { type User } from "../models/user/user";
 import { type UserPost } from "../models/user/userPost";

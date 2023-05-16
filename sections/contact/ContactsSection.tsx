@@ -15,8 +15,9 @@ import { type User } from "../../models/user/user";
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
 import { useUserSearch } from "../../hooks/useUserSearch";
+import { useContactSearch } from "../../hooks/useContactSearch";
 
-// import { contactService } from "../../services/contactService";
+import { contactService } from "../../services/contactService";
 
 import Loading from "../../components/Loading";
 
@@ -24,23 +25,28 @@ const ContactsSection: React.FC = () => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
 
-  // user search
+  // ui states
+  const [timedQuery, setTimedQuery] = React.useState("");
+  const queryTimeRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // user search states
   const [query, setQuery] = React.useState("");
   const [searchIn, setSearchIn] = React.useState<"all" | "contacts">("all");
   const [limit, setLimit] = React.useState(5);
   const [offset, setOffset] = React.useState(0);
 
-  const [timedQuery, setTimedQuery] = React.useState("");
-  const queryTimeRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const { loading, error, errorMessage, users, hasMore } = useUserSearch(
+  const userSearch = useUserSearch(
     { query, searchIn, limit, offset },
     auth.key as string
   );
 
+  // contact states
+  const [contactRefresh, setContactRefresh] = React.useState(false);
+  const contactSearch = useContactSearch(contactRefresh, auth.key as string);
+
   React.useEffect(() => {
-    if (error) snackbar.show(`Error: ${errorMessage}`);
-  }, [errorMessage]);
+    if (userSearch.error) snackbar.show(`Error: ${userSearch.errorMessage}`);
+  }, [userSearch.errorMessage]);
 
   React.useEffect(() => {
     if (queryTimeRef.current != null) clearTimeout(queryTimeRef.current);
@@ -62,10 +68,28 @@ const ContactsSection: React.FC = () => {
     setSearchIn(newValue ? "contacts" : "all");
   }
 
-  function renderUsers(): JSX.Element {
-    if (loading) return <Loading />;
+  async function handleAddContact(id: number): Promise<void> {
+    const res = await contactService.addById(id, auth.key as string);
+    if (!res.success) {
+      snackbar.show("Error: Failed to add to contact");
+    } else {
+      setContactRefresh((x) => !x);
+    }
+  }
 
-    if (users.length < 1 && offset === 0) {
+  async function handleRemoveContact(id: number): Promise<void> {
+    const res = await contactService.deleteById(id, auth.key as string);
+    if (!res.success) {
+      snackbar.show("Error: Failed to delete contact");
+    } else {
+      setContactRefresh((x) => !x);
+    }
+  }
+
+  function renderUsers(): JSX.Element {
+    if (userSearch.loading || contactSearch.loading) return <Loading />;
+
+    if (userSearch.users.length < 1 && offset === 0) {
       return (
         <Text style={{ textAlign: "center", margin: 10 }}>
           No users found...
@@ -77,8 +101,9 @@ const ContactsSection: React.FC = () => {
       <View>
         <FlatList
           style={{ marginVertical: 10 }}
-          data={users}
+          data={userSearch.users}
           renderItem={({ item }) => {
+            if (item.id === auth.userId) return <></>;
             return (
               <>
                 <View
@@ -153,7 +178,7 @@ const ContactsSection: React.FC = () => {
             ]}
           />
           <Button
-            disabled={!hasMore}
+            disabled={!userSearch.hasMore}
             mode="contained-tonal"
             onPress={handlePageNext}
           >
@@ -166,7 +191,47 @@ const ContactsSection: React.FC = () => {
 
   // TODO: update function to either show add or remove if user is contact or not
   function renderItemActions(user: User): JSX.Element {
-    return <Button mode="contained">Add</Button>;
+    let addOrRemoveButton: JSX.Element = <></>;
+
+    const isContact =
+      contactSearch.contacts.findIndex((x) => x.id === user.id) !== -1;
+
+    if (isContact) {
+      addOrRemoveButton = (
+        <Button
+          mode="contained-tonal"
+          onPress={() => {
+            void handleRemoveContact(user.id);
+          }}
+        >
+          Remove
+        </Button>
+      );
+    } else {
+      addOrRemoveButton = (
+        <Button
+          mode="contained"
+          onPress={() => {
+            void handleAddContact(user.id);
+          }}
+        >
+          Add
+        </Button>
+      );
+    }
+
+    let blockOrUnblockButton: JSX.Element = <></>;
+
+    if (!isContact) {
+      blockOrUnblockButton = <Button mode="outlined">Block</Button>;
+    }
+
+    return (
+      <View style={{ flexDirection: "row", gap: 5 }}>
+        {blockOrUnblockButton}
+        {addOrRemoveButton}
+      </View>
+    );
   }
 
   function renderActions(): JSX.Element {
