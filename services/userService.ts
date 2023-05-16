@@ -1,5 +1,8 @@
+import { type UserSearchArgs } from "../types/search/UserSearchArgs";
+
 import { type User } from "../models/user/user";
 import { type UserPost } from "../models/user/userPost";
+
 import { BaseFetchService, type FetchResult } from "./baseFetchService";
 
 class UserService extends BaseFetchService {
@@ -171,9 +174,19 @@ class UserService extends BaseFetchService {
     }
   }
 
-  async search(query: string, authKey: string): Promise<FetchResult> {
+  async search(
+    { query, limit, offset, searchIn }: UserSearchArgs,
+    authKey: string
+  ): Promise<FetchResult> {
     try {
-      const res = await fetch(this.baseUrl + `/search?q=${query}`, {
+      const url = new URL(this.baseUrl + "/search");
+
+      url.searchParams.append("query", query);
+      url.searchParams.append("searchIn", searchIn);
+      url.searchParams.append("limit", limit.toString());
+      url.searchParams.append("offset", offset.toString());
+
+      const res = await fetch(url.href, {
         method: "GET",
         headers: {
           "X-Authorization": authKey,

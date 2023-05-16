@@ -1,120 +1,187 @@
 import React from "react";
-import { FlatList, RefreshControl, ScrollView, View } from "react-native";
-import { Button, Divider, FAB, List, Text } from "react-native-paper";
+import { FlatList, ScrollView, View } from "react-native";
+import {
+  Button,
+  Divider,
+  List,
+  SegmentedButtons,
+  Switch,
+  Text,
+} from "react-native-paper";
 
-import { type Contact } from "../../models/contact/contact";
+import { type User } from "../../models/user/user";
 
-import { useModal } from "../../hooks/useModal";
-
-import AddContactsModal from "../../components/modals/AddContactsModal";
-import { contactService } from "../../services/contactService";
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
+import { useUserSearch } from "../../hooks/useUserSearch";
+
+// import { contactService } from "../../services/contactService";
+
 import Loading from "../../components/Loading";
 
 const ContactsSection: React.FC = () => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
 
-  const [contacts, setContacts] = React.useState<Contact[]>([]);
+  // user search
+  const [query, setQuery] = React.useState("");
+  const [searchIn, setSearchIn] = React.useState<"all" | "contacts">("all");
+  const [limit, setLimit] = React.useState(5);
+  const [offset, setOffset] = React.useState(0);
 
-  const [loading, setLoading] = React.useState(true);
-  const [toggleRefresh, setToggleRefresh] = React.useState(false);
-
-  const addContactsModal = useModal();
+  const { loading, error, errorMessage, users, hasMore } = useUserSearch(
+    { query, searchIn, limit, offset },
+    auth.key as string
+  );
 
   React.useEffect(() => {
-    void (async () => {
-      setLoading(true);
+    if (error) snackbar.show(`Error: ${errorMessage}`);
+  }, [errorMessage]);
 
-      const res = await contactService.getAll(auth.key as string);
-      if (!res.success) {
-        snackbar.show("Error: Failed to get the contacts.");
-        setLoading(false);
-        return;
-      }
-      setContacts(res.data as Contact[]);
-
-      setLoading(false);
-    })();
-  }, [toggleRefresh]);
-
-  function handleRefresh(): void {
-    setToggleRefresh((x) => !x);
+  function handlePageBack(): void {
+    setOffset((x) => x - 1);
   }
 
-  function handleAddContacts(): void {
-    addContactsModal.show();
+  function handlePageNext(): void {
+    setOffset((x) => x + 1);
   }
 
-  async function handleDeleteContact(userId: number): Promise<void> {
-    const res = await contactService.deleteById(userId, auth.key as string);
-    if (!res.success) {
-      snackbar.show("Failed to delete contact.");
-    } else {
-      snackbar.show("Successfully deleted the contact!");
-    }
-    handleRefresh();
+  function handleContactSwitchChange(newValue: boolean): void {
+    setSearchIn(newValue ? "contacts" : "all");
   }
 
-  function renderContacts(): JSX.Element {
+  function renderUsers(): JSX.Element {
     if (loading) return <Loading />;
 
-    if (contacts.length === 0) {
+    if (users.length < 1 && offset === 0) {
       return (
-        <Text variant="labelLarge" style={{ padding: 10, textAlign: "center" }}>
-          You currently do not have any contacts. Add contacts using the buttons
-          below
+        <Text style={{ textAlign: "center", margin: 10 }}>
+          No users found...
         </Text>
       );
     }
 
     return (
-      <FlatList
-        data={contacts}
-        renderItem={({ item }) => (
-          <>
-            <View style={{ flex: 1, flexDirection: "row" }}>
-              <List.Item
-                style={{ flex: 0.75 }}
-                title={`${item.firstName} ${item.lastName}`}
-                description={item.email}
-              />
-              <Button
-                style={{
-                  flex: 0.2,
-                  alignSelf: "center",
-                }}
-                onPress={function () {
-                  void handleDeleteContact(item.id);
-                }}
-              >
-                Delete
-              </Button>
-            </View>
-            <Divider />
-          </>
-        )}
-      />
+      <View>
+        <FlatList
+          data={users}
+          renderItem={({ item }) => {
+            return (
+              <>
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <List.Item
+                    title={`${item.firstName} ${item.lastName}`}
+                    titleStyle={{ fontWeight: "bold" }}
+                    description={item.email}
+                  />
+                  <View
+                    style={{
+                      alignSelf: "center",
+                      padding: 10,
+                    }}
+                  >
+                    {renderItemActions(item)}
+                  </View>
+                </View>
+                <Divider />
+              </>
+            );
+          }}
+        />
+        <Text variant="labelSmall" style={{ textAlign: "center" }}>
+          Current Page: {offset + 1}
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 5,
+          }}
+        >
+          <Button
+            disabled={offset <= 0}
+            mode="contained-tonal"
+            onPress={handlePageBack}
+          >
+            Back
+          </Button>
+          <SegmentedButtons
+            density="small"
+            style={{ transform: [{ scale: 0.8 }] }}
+            value={limit.toString()}
+            onValueChange={(val) => {
+              setLimit(parseInt(val));
+            }}
+            buttons={[
+              { value: "1", label: "1" },
+              { value: "5", label: "5" },
+              { value: "10", label: "10" },
+            ]}
+          />
+          <Button
+            disabled={!hasMore}
+            mode="contained-tonal"
+            onPress={handlePageNext}
+          >
+            Next
+          </Button>
+        </View>
+      </View>
+    );
+  }
+
+  // TODO: update function to either show add or remove if user is contact or not
+  function renderItemActions(user: User): JSX.Element {
+    return <Button mode="contained">Add</Button>;
+  }
+
+  function renderActions(): JSX.Element {
+    return (
+      <View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            padding: 10,
+          }}
+        >
+          <Text variant="bodyLarge">Show Only Contacts</Text>
+          <Switch
+            style={{ alignSelf: "center" }}
+            value={searchIn === "contacts"}
+            onValueChange={handleContactSwitchChange}
+          />
+        </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            padding: 10,
+          }}
+        >
+          <Text variant="bodyLarge">Show Only Blocked</Text>
+          <Switch
+            style={{ alignSelf: "center" }}
+            value={searchIn === "contacts"}
+            onValueChange={handleContactSwitchChange}
+          />
+        </View>
+      </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView>
-        <RefreshControl refreshing={toggleRefresh} onRefresh={handleRefresh} />
-        {renderContacts()}
-      </ScrollView>
-      <FAB
-        icon="plus"
-        style={{ position: "absolute", bottom: 10, right: 10 }}
-        onPress={handleAddContacts}
-      />
-      <AddContactsModal
-        visible={addContactsModal.visible}
-        hide={addContactsModal.hide}
-        refresh={handleRefresh}
-      />
+    <View style={{ flex: 1, justifyContent: "space-between" }}>
+      <ScrollView>{renderUsers()}</ScrollView>
+      <View>{renderActions()}</View>
     </View>
   );
 };
