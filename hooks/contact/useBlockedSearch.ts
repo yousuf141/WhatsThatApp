@@ -1,10 +1,10 @@
 import React from "react";
 
-import { type useBlockedSearchResponse } from "../types/search/blocked/BlockedSearch";
+import { type useBlockedSearchResponse } from "../../types/search/blocked/BlockedSearch";
 
-import { type User } from "../models/user/user";
+import { type User } from "../../models/user/user";
 
-import { contactService } from "../services/contactService";
+import { contactService } from "../../services/contactService";
 
 export const useBlockedSearch = (
   refresh: boolean,

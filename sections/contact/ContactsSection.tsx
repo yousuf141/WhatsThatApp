@@ -17,7 +17,7 @@ import { useSnackbar } from "../../hooks/useSnackbar";
 
 import { useUserSearch } from "../../hooks/useUserSearch";
 import { useContactSearch } from "../../hooks/contact/useContactSearch";
-import { useBlockedSearch } from "../../hooks/useBlockedSearch";
+import { useBlockedSearch } from "../../hooks/contact/useBlockedSearch";
 
 import { contactService } from "../../services/contactService";
 
