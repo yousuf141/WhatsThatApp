@@ -135,7 +135,6 @@ const ContactsSection: React.FC = () => {
           style={{ marginVertical: 10 }}
           data={userSearch.users}
           renderItem={({ item }) => {
-            if (item.id === auth.userId) return <></>;
             if (onlyBlocked) {
               const isBlocked =
                 blockedSearch.users.findIndex((x) => x.id === item.id) !== -1;
@@ -246,6 +245,8 @@ const ContactsSection: React.FC = () => {
 
   // TODO: update function to either show add or remove if user is contact or not
   function renderItemActions(user: User): JSX.Element {
+    if (user.id === auth.userId) return <></>;
+
     let addOrRemoveButton: JSX.Element = <></>;
 
     const isContact =
