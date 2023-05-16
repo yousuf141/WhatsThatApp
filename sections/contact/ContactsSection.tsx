@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   List,
+  Searchbar,
   SegmentedButtons,
   Switch,
   Text,
@@ -63,7 +64,9 @@ const ContactsSection: React.FC = () => {
 
     return (
       <View>
+        <Searchbar value={query} />
         <FlatList
+          style={{ marginVertical: 10 }}
           data={users}
           renderItem={({ item }) => {
             return (
@@ -94,6 +97,21 @@ const ContactsSection: React.FC = () => {
             );
           }}
         />
+        <View
+          style={{
+            marginTop: 10,
+            padding: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text variant="bodyLarge">Show Only Contacts</Text>
+          <Switch
+            style={{ alignSelf: "center" }}
+            value={searchIn === "contacts"}
+            onValueChange={handleContactSwitchChange}
+          />
+        </View>
         <Text variant="labelSmall" style={{ textAlign: "center" }}>
           Current Page: {offset + 1}
         </Text>
@@ -142,40 +160,7 @@ const ContactsSection: React.FC = () => {
   }
 
   function renderActions(): JSX.Element {
-    return (
-      <View>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            padding: 10,
-          }}
-        >
-          <Text variant="bodyLarge">Show Only Contacts</Text>
-          <Switch
-            style={{ alignSelf: "center" }}
-            value={searchIn === "contacts"}
-            onValueChange={handleContactSwitchChange}
-          />
-        </View>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            padding: 10,
-          }}
-        >
-          <Text variant="bodyLarge">Show Only Blocked</Text>
-          <Switch
-            style={{ alignSelf: "center" }}
-            value={searchIn === "contacts"}
-            onValueChange={handleContactSwitchChange}
-          />
-        </View>
-      </View>
-    );
+    return <></>;
   }
 
   return (
