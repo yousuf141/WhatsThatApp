@@ -1,21 +1,21 @@
 import React from "react";
 
-import { type useBlockedSearchResponse } from "../types/search/blocked/BlockedSearch";
+import { type useContactSearchResponse } from "../../types/search/contact/ContactSearch";
 
-import { type User } from "../models/user/user";
+import { type Contact } from "../../models/contact/contact";
 
-import { contactService } from "../services/contactService";
+import { contactService } from "../../services/contactService";
 
-export const useBlockedSearch = (
+export const useContactSearch = (
   refresh: boolean,
   authKey: string
-): useBlockedSearchResponse => {
+): useContactSearchResponse => {
   const [loading, setLoading] = React.useState(false);
 
   const [error, setError] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
 
-  const [users, setUsers] = React.useState<User[]>([]);
+  const [contacts, setContacts] = React.useState<Contact[]>([]);
 
   React.useEffect(() => {
     void (async () => {
@@ -23,16 +23,16 @@ export const useBlockedSearch = (
       setErrorMessage("");
       setLoading(true);
 
-      const res = await contactService.getAllBlocked(authKey);
+      const res = await contactService.getAll(authKey);
       if (!res.success) {
         setError(true);
         setErrorMessage(res.message ?? "");
       } else {
-        setUsers(res.data as User[]);
+        setContacts(res.data as Contact[]);
       }
       setLoading(false);
     })();
   }, [refresh]);
 
-  return { loading, error, errorMessage, users };
+  return { loading, error, errorMessage, contacts };
 };
