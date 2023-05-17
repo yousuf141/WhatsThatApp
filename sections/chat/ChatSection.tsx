@@ -1,15 +1,18 @@
 import React from "react";
-import { ScrollView, View } from "react-native";
-import { Button, Card, Divider, Text } from "react-native-paper";
+import { FlatList, View } from "react-native";
+import { Button, Card, Divider, Text, TextInput } from "react-native-paper";
 
 import { type RouteProp } from "@react-navigation/native";
 
 import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
 import { useAuth } from "../../providers/AuthProvider";
+import { useSnackbar } from "../../hooks/useSnackbar";
 import { useModal } from "../../hooks/useModal";
 
 import { useChatDetailsSearch } from "../../hooks/chat/useChatDetailsSearch";
+
+import { chatService } from "../../services/chatService";
 
 import Loading from "../../components/Loading";
 import UserIcon from "../../components/user/UserIcon";
@@ -26,10 +29,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
   const chatMetaName: string = route.params.chatMeta.name;
 
   const [auth] = useAuth();
+  const snackbar = useSnackbar();
 
-  const limit = 10;
-  const [offset, setOffset] = React.useState(0);
+  const limit = 100;
+  const [offset] = React.useState(0);
   const [refreshChat, setRefreshChat] = React.useState(false);
+
+  const [newMessage, setNewMessage] = React.useState("");
 
   const chatDetailsSearch = useChatDetailsSearch(
     { id: chatMetaId, limit, offset },
@@ -46,6 +52,20 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
 
   function handleAddContactToChat(): void {
     addContactToChatModal.show();
+  }
+
+  async function handleCreateMessage(): Promise<void> {
+    const res = await chatService.createMessage(
+      chatMetaId,
+      newMessage,
+      auth.key as string
+    );
+    if (!res.success) {
+      snackbar.show("Error: Failed to send message.");
+    } else {
+      setRefreshChat((x) => !x);
+      setNewMessage("");
+    }
   }
 
   function renderHeader(): JSX.Element {
@@ -107,7 +127,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
     if (chatDetailsSearch.loading) return <Loading />;
 
     return (
-      <View>
+      <View style={{ flex: 1 }}>
         {renderActionBar()}
         <Divider />
         {renderMessages()}
@@ -122,40 +142,70 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
     if (messages.length === 0) return <Text>No messages...</Text>;
 
     return (
-      <ScrollView
-        style={{ flex: 0.8, marginTop: 10 }}
+      <FlatList
         contentContainerStyle={{
-          flexDirection: "column-reverse",
+          flexDirection: "column",
         }}
-      >
-        {messages.map((message) => {
-          let author = `${message.author.firstName} ${message.author.lastName}`;
-          if (auth.userId === message.author.id) author = "You";
+        inverted
+        data={chatDetailsSearch.chatDetails.messages}
+        renderItem={({ item }) => {
+          let author = `${item.author.firstName} ${item.author.lastName}`;
+          if (auth.userId === item.author.id) author = "You";
 
           return (
-            <Card key={message.id}>
+            <Card key={item.id}>
               <Card.Title
                 titleStyle={{ fontWeight: "bold" }}
                 title={author}
-                subtitle={new Date(message.timestamp).toLocaleString()}
+                subtitle={new Date(item.timestamp).toLocaleString()}
               />
               <Card.Content>
-                <Text>{message.message}</Text>
+                <Text>{item.message}</Text>
               </Card.Content>
             </Card>
           );
-        })}
-      </ScrollView>
+        }}
+      />
+    );
+  }
+
+  function renderMessageActions(): JSX.Element {
+    return (
+      <View
+        style={{
+          padding: 10,
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <TextInput
+          style={{ flexGrow: 1 }}
+          placeholder="New chat name here..."
+          value={newMessage}
+          onChangeText={setNewMessage}
+        />
+        <Button
+          mode="contained"
+          style={{ marginLeft: 10, alignSelf: "center" }}
+          onPress={() => {
+            void handleCreateMessage();
+          }}
+        >
+          Send
+        </Button>
+      </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      {renderHeader()}
+    <View style={{ flex: 1, justifyContent: "space-between" }}>
+      <View style={{ flex: 0.9 }}>
+        {renderHeader()}
+        <Divider />
+        {renderMainContent()}
+      </View>
       <Divider />
-      {renderMainContent()}
-      <Divider />
-
+      {renderMessageActions()}
       <AddContactToChatModal
         visible={addContactToChatModal.visible}
         hide={addContactToChatModal.hide}
