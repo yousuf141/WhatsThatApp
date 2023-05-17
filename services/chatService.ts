@@ -1,4 +1,4 @@
-import { type ChatMetadata } from "../models/chat/chat";
+import { type ChatMetadata } from "../models/chat/chat-metadata";
 import { type Message } from "../models/chat/message";
 import { type User } from "../models/user/user";
 

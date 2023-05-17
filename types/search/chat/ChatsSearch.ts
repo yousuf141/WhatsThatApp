@@ -1,4 +1,4 @@
-import { type ChatMetadata } from "../../../models/chat/chat";
+import { type ChatMetadata } from "../../../models/chat/chat-metadata";
 
 export interface useChatsSearchResponse {
   loading: boolean;

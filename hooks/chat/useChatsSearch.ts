@@ -1,7 +1,7 @@
 import React from "react";
 
 import { type useChatsSearchResponse } from "../../types/search/chat/ChatsSearch";
-import { type ChatMetadata } from "../../models/chat/chat";
+import { type ChatMetadata } from "../../models/chat/chat-metadata";
 
 import { chatService } from "../../services/chatService";
 

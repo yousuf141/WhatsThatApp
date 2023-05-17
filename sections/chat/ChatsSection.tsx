@@ -1,8 +1,9 @@
 import React from "react";
 import { FlatList, View } from "react-native";
 import { Button, Divider, List, TextInput } from "react-native-paper";
+import { type NavigationProp } from "@react-navigation/native";
 
-import { type ChatMetadata } from "../../models/chat/chat";
+import { type ChatMetadata } from "../../models/chat/chat-metadata";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
@@ -13,7 +14,11 @@ import { chatService } from "../../services/chatService";
 
 import Loading from "../../components/Loading";
 
-const ChatsSection: React.FC = () => {
+interface ChatsSectionProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
 
@@ -43,6 +48,10 @@ const ChatsSection: React.FC = () => {
     }
   }
 
+  function handleOpenChat(chatMeta: ChatMetadata): void {
+    navigation.navigate("ChatSection", { chatMeta });
+  }
+
   function renderChats(): JSX.Element {
     if (chatsSearch.loading) return <Loading />;
 
@@ -62,7 +71,14 @@ const ChatsSection: React.FC = () => {
 
     return (
       <View key={chat.id}>
-        <List.Item title={chat.name} description={description} />
+        <List.Item
+          onPress={() => {
+            handleOpenChat(chat);
+          }}
+          titleStyle={{ fontWeight: "700" }}
+          title={chat.name}
+          description={description}
+        />
         <Divider />
       </View>
     );
@@ -88,7 +104,9 @@ const ChatsSection: React.FC = () => {
         <Button
           mode="contained"
           style={{ marginLeft: 10, alignSelf: "center" }}
-          onPress={handleCreateNewChat}
+          onPress={() => {
+            void handleCreateNewChat();
+          }}
         >
           New Chat
         </Button>
