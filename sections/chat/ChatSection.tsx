@@ -1,6 +1,6 @@
 import React from "react";
-import { View } from "react-native";
-import { Button, Divider, Text } from "react-native-paper";
+import { ScrollView, View } from "react-native";
+import { Button, Card, Divider, Text } from "react-native-paper";
 
 import { type RouteProp } from "@react-navigation/native";
 
@@ -110,7 +110,42 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
       <View>
         {renderActionBar()}
         <Divider />
+        {renderMessages()}
       </View>
+    );
+  }
+
+  function renderMessages(): JSX.Element {
+    if (chatDetailsSearch.chatDetails == null) return <></>;
+    const messages = chatDetailsSearch.chatDetails.messages;
+
+    if (messages.length === 0) return <Text>No messages...</Text>;
+
+    return (
+      <ScrollView
+        style={{ flex: 0.8, marginTop: 10 }}
+        contentContainerStyle={{
+          flexDirection: "column-reverse",
+        }}
+      >
+        {messages.map((message) => {
+          let author = `${message.author.firstName} ${message.author.lastName}`;
+          if (auth.userId === message.author.id) author = "You";
+
+          return (
+            <Card key={message.id}>
+              <Card.Title
+                titleStyle={{ fontWeight: "bold" }}
+                title={author}
+                subtitle={new Date(message.timestamp).toLocaleString()}
+              />
+              <Card.Content>
+                <Text>{message.message}</Text>
+              </Card.Content>
+            </Card>
+          );
+        })}
+      </ScrollView>
     );
   }
 
@@ -119,6 +154,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
       {renderHeader()}
       <Divider />
       {renderMainContent()}
+      <Divider />
+
       <AddContactToChatModal
         visible={addContactToChatModal.visible}
         hide={addContactToChatModal.hide}
