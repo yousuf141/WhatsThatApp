@@ -1,6 +1,13 @@
 import React from "react";
 import { View } from "react-native";
-import { Button, Modal, Portal, Text, TextInput } from "react-native-paper";
+import {
+  Button,
+  DefaultTheme,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+} from "react-native-paper";
 
 import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
@@ -48,7 +55,15 @@ const EditChatMetaModal: React.FC<EditChatMetaModalProps> = ({
 
   return (
     <Portal>
-      <Modal visible={visible} onDismiss={hide}>
+      <Modal
+        visible={visible}
+        onDismiss={hide}
+        contentContainerStyle={{
+          backgroundColor: DefaultTheme.colors.background,
+          margin: 5,
+          borderRadius: 10,
+        }}
+      >
         <View>
           <Text
             variant="titleMedium"
