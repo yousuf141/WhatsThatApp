@@ -1,6 +1,8 @@
-import { type ChatMetadata } from "../models/chat/chat-metadata";
+import { ChatDetails } from "../models/chat/ChatDetails";
+import { type ChatMetadata } from "../models/chat/ChatMetadata";
 import { type Message } from "../models/chat/message";
 import { type User } from "../models/user/user";
+import { ChatDetailsSearchArgs } from "../types/search/chat/ChatDetailsSearch";
 
 import { BaseFetchService, type FetchResult } from "./baseFetchService";
 
@@ -40,6 +42,60 @@ class ChatService extends BaseFetchService {
       return {
         success: true,
         data: chats satisfies ChatMetadata[],
+      };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
+
+  async getDetailsById(
+    { id, limit, offset }: ChatDetailsSearchArgs,
+    authKey: string
+  ): Promise<FetchResult> {
+    try {
+      const url = new URL(this.baseUrl + `/chat/${id}`);
+      url.searchParams.append("limit", limit.toString());
+      url.searchParams.append("offset", offset.toString());
+
+      const res = await fetch(url.href, {
+        method: "GET",
+        headers: { ...this.defaultHeaders, "X-Authorization": authKey },
+      });
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      const data = await res.json();
+      const chatDetails: ChatDetails = {
+        name: data.name,
+        creator: {
+          id: data.creator.user_id,
+          firstName: data.creator.first_name,
+          lastName: data.creator.last_name,
+          email: data.creator.emial,
+        },
+        members: data.members.map((x: any) => ({
+          id: x.user_id,
+          firstName: x.first_name,
+          lastName: x.last_name,
+          email: x.email,
+        })),
+        messages: data.messages.map((x: any) => ({
+          id: x.message_id,
+          timestamp: x.timestamp,
+          message: x.message,
+          author: {
+            id: x.author.user_id,
+            firstName: x.author.first_name,
+            lastName: x.author.last_name,
+            email: x.author.email,
+          },
+        })),
+      };
+      return {
+        success: true,
+        data: chatDetails satisfies ChatDetails,
       };
     } catch (e) {
       console.error(e);

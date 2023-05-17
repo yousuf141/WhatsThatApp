@@ -147,6 +147,10 @@ class UserService extends BaseFetchService {
     }
   }
 
+  getPhotoByIdUrl(id: number): string {
+    return this.baseUrl + `/user/${id}/photo`;
+  }
+
   async uploadPhotoById(
     id: number,
     blob: Blob,

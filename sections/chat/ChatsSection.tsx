@@ -3,7 +3,7 @@ import { FlatList, View } from "react-native";
 import { Button, Divider, List, TextInput } from "react-native-paper";
 import { type NavigationProp } from "@react-navigation/native";
 
-import { type ChatMetadata } from "../../models/chat/chat-metadata";
+import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
