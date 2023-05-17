@@ -96,6 +96,7 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
               handleOpenChat(chat);
             }}
             titleStyle={{ fontWeight: "700" }}
+            style={{ flex: 0.7 }}
             title={chat.name}
             description={description}
           />
