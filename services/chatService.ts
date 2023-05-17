@@ -1,8 +1,8 @@
-import { ChatDetails } from "../models/chat/ChatDetails";
+import { type ChatDetails } from "../models/chat/ChatDetails";
 import { type ChatMetadata } from "../models/chat/ChatMetadata";
 import { type Message } from "../models/chat/message";
 import { type User } from "../models/user/user";
-import { ChatDetailsSearchArgs } from "../types/search/chat/ChatDetailsSearch";
+import { type ChatDetailsSearchArgs } from "../types/search/chat/ChatDetailsSearch";
 
 import { BaseFetchService, type FetchResult } from "./baseFetchService";
 
@@ -131,6 +131,30 @@ class ChatService extends BaseFetchService {
         this.baseUrl + `/chat/${chatId}/user/${contactId}`,
         {
           method: "POST",
+          headers: { ...this.defaultHeaders, "X-Authorization": authKey },
+        }
+      );
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
+
+  async removeContactFromChat(
+    chatId: number,
+    contactId: number,
+    authKey: string
+  ): Promise<FetchResult> {
+    try {
+      const res = await fetch(
+        this.baseUrl + `/chat/${chatId}/user/${contactId}`,
+        {
+          method: "DELETE",
           headers: { ...this.defaultHeaders, "X-Authorization": authKey },
         }
       );

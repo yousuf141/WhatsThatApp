@@ -14,55 +14,47 @@ import { type Contact } from "../../models/contact/contact";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
-import { useContactSearch } from "../../hooks/contact/useContactSearch";
 
 import { chatService } from "../../services/chatService";
 
-import Loading from "../Loading";
-
-interface TakePhotoModalProps {
+interface RemoveContactFromChatModalProps {
   visible: boolean;
   chatId: number;
-  existingContacts: Contact[];
+  contacts: Contact[];
   refresh: () => void;
   hide: () => void;
 }
 
-const AddContactToChatModal: React.FC<TakePhotoModalProps> = ({
+const RemoveContactFromChatModal: React.FC<RemoveContactFromChatModalProps> = ({
   visible,
-  chatId,
-  existingContacts,
   refresh,
+  chatId,
+  contacts,
   hide,
 }) => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
 
-  const contactSearch = useContactSearch(visible, auth.key as string);
-
-  async function handleAddContact(contact: Contact): Promise<void> {
-    const res = await chatService.addContactToChat(
+  async function handleRemoveContact(contact: Contact): Promise<void> {
+    const res = await chatService.removeContactFromChat(
       chatId,
       contact.id,
       auth.key as string
     );
     if (res.success) {
-      snackbar.show("Successfully added the contact!");
+      snackbar.show("Successfully removed the contact!");
       hide();
       refresh();
     } else {
-      snackbar.show("Error: Failed to add the contact.");
+      snackbar.show("Error: Failed to remove the contact.");
     }
   }
 
   function renderContacts(): JSX.Element {
-    if (contactSearch.loading) return <Loading />;
     return (
       <View>
-        {contactSearch.contacts.map((contact) => {
-          if (existingContacts.findIndex((x) => x.id === contact.id) !== -1)
-            return null;
-
+        {contacts.map((contact) => {
+          if (contact.id === auth.userId) return null;
           return (
             <View key={contact.id}>
               <View
@@ -98,12 +90,12 @@ const AddContactToChatModal: React.FC<TakePhotoModalProps> = ({
     return (
       <View style={{ flexDirection: "row", gap: 5 }}>
         <Button
-          mode="contained"
+          mode="contained-tonal"
           onPress={() => {
-            void handleAddContact(contact);
+            void handleRemoveContact(contact);
           }}
         >
-          Add
+          Remove
         </Button>
       </View>
     );
@@ -125,7 +117,7 @@ const AddContactToChatModal: React.FC<TakePhotoModalProps> = ({
             variant="titleMedium"
             style={{ padding: 10, fontWeight: "500" }}
           >
-            Add Contact
+            Edit Contacts
           </Text>
           {renderContacts()}
         </View>
@@ -133,4 +125,4 @@ const AddContactToChatModal: React.FC<TakePhotoModalProps> = ({
     </Portal>
   );
 };
-export default AddContactToChatModal;
+export default RemoveContactFromChatModal;

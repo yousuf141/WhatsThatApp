@@ -13,7 +13,9 @@ import { useChatDetailsSearch } from "../../hooks/chat/useChatDetailsSearch";
 
 import Loading from "../../components/Loading";
 import UserIcon from "../../components/user/UserIcon";
+
 import AddContactToChatModal from "../../components/modals/AddContactToChatModal";
+import RemoveContactFromChatModal from "../../components/modals/RemoveContactFromChatModal";
 
 interface ChatSectionProps {
   route: RouteProp<{ params: { chatMeta: ChatMetadata } }>;
@@ -36,6 +38,11 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
   );
 
   const addContactToChatModal = useModal();
+  const removeContactFromChatModal = useModal();
+
+  function handleRemoveContactFromChat(): void {
+    removeContactFromChatModal.show();
+  }
 
   function handleAddContactToChat(): void {
     addContactToChatModal.show();
@@ -77,7 +84,11 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
           }) ?? <></>}
         </View>
         <View style={{ flexDirection: "row" }}>
-          <Button mode="contained-tonal" style={{ alignSelf: "center" }}>
+          <Button
+            onPress={handleRemoveContactFromChat}
+            mode="contained-tonal"
+            style={{ alignSelf: "center" }}
+          >
             View/Edit
           </Button>
           <Button
@@ -112,6 +123,16 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
         visible={addContactToChatModal.visible}
         hide={addContactToChatModal.hide}
         chatId={chatMetaId}
+        existingContacts={chatDetailsSearch.chatDetails?.members ?? []}
+        refresh={() => {
+          setRefreshChat((x) => !x);
+        }}
+      />
+      <RemoveContactFromChatModal
+        visible={removeContactFromChatModal.visible}
+        hide={removeContactFromChatModal.hide}
+        chatId={chatMetaId}
+        contacts={chatDetailsSearch.chatDetails?.members ?? []}
         refresh={() => {
           setRefreshChat((x) => !x);
         }}
