@@ -41,6 +41,11 @@ const EditMessageModal: React.FC<EditMessageModalProps> = ({
   }, [visible]);
 
   async function handleSaveMessage(): Promise<void> {
+    if (newMessage.length === 0) {
+      snackbar.show("Error: Invalid new message");
+      return;
+    }
+
     const res = await chatService.updateMessage(
       chatId,
       message.id,

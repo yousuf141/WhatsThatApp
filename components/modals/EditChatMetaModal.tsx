@@ -39,6 +39,11 @@ const EditChatMetaModal: React.FC<EditChatMetaModalProps> = ({
   }, [visible]);
 
   async function handleSaveChanges(): Promise<void> {
+    if (newName.length === 0) {
+      snackbar.show("Error: Invalid name for a chat");
+      return;
+    }
+
     const res = await chatService.updateChat(
       newName,
       chatToEdit.id,
