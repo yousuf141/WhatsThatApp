@@ -121,6 +121,28 @@ class ChatService extends BaseFetchService {
     }
   }
 
+  async updateChat(
+    name: string,
+    chatId: number,
+    authKey: string
+  ): Promise<FetchResult> {
+    try {
+      const res = await fetch(this.baseUrl + `/chat/${chatId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name }),
+        headers: { ...this.defaultHeaders, "X-Authorization": authKey },
+      });
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
+
   async addContactToChat(
     chatId: number,
     contactId: number,

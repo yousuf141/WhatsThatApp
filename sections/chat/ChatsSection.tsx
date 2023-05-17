@@ -7,12 +7,14 @@ import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
+import { useModal } from "../../hooks/useModal";
 
 import { useChatsSearch } from "../../hooks/chat/useChatsSearch";
 
 import { chatService } from "../../services/chatService";
 
 import Loading from "../../components/Loading";
+import EditChatMetaModal from "../../components/modals/EditChatMetaModal";
 
 interface ChatsSectionProps {
   navigation: NavigationProp<any, any>;
@@ -28,6 +30,10 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
   // chats states
   const [chatsRefresh, setChatsRefresh] = React.useState(false);
   const chatsSearch = useChatsSearch(auth.key as string, chatsRefresh);
+
+  // update chat modal
+  const [chatToEdit, setChatToEdit] = React.useState<ChatMetadata>();
+  const editChatMetaModal = useModal();
 
   React.useEffect(() => {
     if (chatsSearch.error) snackbar.show(`Error: ${chatsSearch.errorMessage}`);
@@ -52,6 +58,11 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
     navigation.navigate("ChatSection", { chatMeta });
   }
 
+  function handleEditChatMeta(chatMeta: ChatMetadata): void {
+    setChatToEdit(chatMeta);
+    editChatMetaModal.show();
+  }
+
   function renderChats(): JSX.Element {
     if (chatsSearch.loading) return <Loading />;
 
@@ -70,16 +81,44 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
     }
 
     return (
-      <View key={chat.id}>
-        <List.Item
-          onPress={() => {
-            handleOpenChat(chat);
+      <>
+        <View
+          key={chat.id}
+          style={{
+            flex: 1,
+            padding: 5,
+            flexDirection: "row",
+            justifyContent: "space-between",
           }}
-          titleStyle={{ fontWeight: "700" }}
-          title={chat.name}
-          description={description}
-        />
+        >
+          <List.Item
+            onPress={() => {
+              handleOpenChat(chat);
+            }}
+            titleStyle={{ fontWeight: "700" }}
+            title={chat.name}
+            description={description}
+          />
+          {renderChatItemActions(chat)}
+        </View>
         <Divider />
+      </>
+    );
+  }
+
+  function renderChatItemActions(chat: ChatMetadata): JSX.Element {
+    if (chat.creator.id !== auth.userId) return <></>;
+
+    return (
+      <View style={{ alignSelf: "center" }}>
+        <Button
+          onPress={() => {
+            handleEditChatMeta(chat);
+          }}
+          mode="contained-tonal"
+        >
+          Edit
+        </Button>
       </View>
     );
   }
@@ -118,6 +157,14 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
     <View style={{ flex: 1, justifyContent: "space-between" }}>
       {renderChats()}
       {renderChatsActions()}
+      <EditChatMetaModal
+        visible={editChatMetaModal.visible}
+        chatToEdit={chatToEdit as ChatMetadata}
+        hide={editChatMetaModal.hide}
+        refresh={() => {
+          setChatsRefresh((x) => !x);
+        }}
+      />
     </View>
   );
 };
