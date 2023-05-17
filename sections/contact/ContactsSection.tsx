@@ -65,7 +65,6 @@ const ContactsSection: React.FC = () => {
   React.useEffect(() => {
     if (queryTimeRef.current != null) clearTimeout(queryTimeRef.current);
     queryTimeRef.current = setTimeout(() => {
-      console.log(timedQuery);
       setQuery(timedQuery);
     }, 500);
   }, [timedQuery]);

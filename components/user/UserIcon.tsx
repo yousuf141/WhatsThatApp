@@ -18,9 +18,6 @@ const UserIcon: React.FC<UserIconProps> = ({ user, authKey }) => {
       const res = await userService.getPhotoById(user.id, authKey);
       if (res.data != null) {
         const image = await blobToBase64(res.data);
-
-        console.log(image);
-
         setUri(image as string);
       }
     })();

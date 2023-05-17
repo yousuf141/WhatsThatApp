@@ -7,11 +7,13 @@ import { type RouteProp } from "@react-navigation/native";
 import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
 import { useAuth } from "../../providers/AuthProvider";
+import { useModal } from "../../hooks/useModal";
 
 import { useChatDetailsSearch } from "../../hooks/chat/useChatDetailsSearch";
 
 import Loading from "../../components/Loading";
 import UserIcon from "../../components/user/UserIcon";
+import AddContactToChatModal from "../../components/modals/AddContactToChatModal";
 
 interface ChatSectionProps {
   route: RouteProp<{ params: { chatMeta: ChatMetadata } }>;
@@ -20,8 +22,6 @@ interface ChatSectionProps {
 const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
   const chatMetaId: number = route.params.chatMeta.id;
   const chatMetaName: string = route.params.chatMeta.name;
-
-  console.log(chatMetaId);
 
   const [auth] = useAuth();
 
@@ -34,6 +34,12 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
     auth.key as string,
     refreshChat
   );
+
+  const addContactToChatModal = useModal();
+
+  function handleAddContactToChat(): void {
+    addContactToChatModal.show();
+  }
 
   function renderHeader(): JSX.Element {
     return (
@@ -74,7 +80,11 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
           <Button mode="contained-tonal" style={{ alignSelf: "center" }}>
             View/Edit
           </Button>
-          <Button mode="contained" style={{ alignSelf: "center" }}>
+          <Button
+            onPress={handleAddContactToChat}
+            mode="contained"
+            style={{ alignSelf: "center" }}
+          >
             Add
           </Button>
         </View>
@@ -98,6 +108,14 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
       {renderHeader()}
       <Divider />
       {renderMainContent()}
+      <AddContactToChatModal
+        visible={addContactToChatModal.visible}
+        hide={addContactToChatModal.hide}
+        chatId={chatMetaId}
+        refresh={() => {
+          setRefreshChat((x) => !x);
+        }}
+      />
     </View>
   );
 };
