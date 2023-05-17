@@ -54,6 +54,16 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
 
   const editMessageModal = useModal();
 
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshChat((x) => !x);
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   function handleRemoveContactFromChat(): void {
     removeContactFromChatModal.show();
   }
@@ -163,7 +173,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
         data={chatDetailsSearch.chatDetails.messages}
         renderItem={({ item }) => {
           let author = `${item.author.firstName} ${item.author.lastName}`;
-          if (auth.userId === item.author.id) author = "You";
+          const isAuthor = auth.userId === item.author.id;
+          if (isAuthor) author = "You";
 
           return (
             <Card
@@ -185,22 +196,26 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
                   <Text>{item.message}</Text>
                 </Card.Content>
               </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                }}
-              >
-                <Button
-                  onPress={() => {
-                    handleEditMessage(item);
+              {isAuthor ? (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
                   }}
-                  mode="contained-tonal"
                 >
-                  Edit
-                </Button>
-              </View>
+                  <Button
+                    onPress={() => {
+                      handleEditMessage(item);
+                    }}
+                    mode="contained-tonal"
+                  >
+                    Edit
+                  </Button>
+                </View>
+              ) : (
+                <></>
+              )}
             </Card>
           );
         }}

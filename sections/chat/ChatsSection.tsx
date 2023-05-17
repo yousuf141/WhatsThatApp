@@ -1,7 +1,7 @@
 import React from "react";
 import { FlatList, View } from "react-native";
 import { Button, Divider, List, TextInput } from "react-native-paper";
-import { type NavigationProp } from "@react-navigation/native";
+import { useFocusEffect, type NavigationProp } from "@react-navigation/native";
 
 import { type ChatMetadata } from "../../models/chat/ChatMetadata";
 
@@ -34,6 +34,16 @@ const ChatsSection: React.FC<ChatsSectionProps> = ({ navigation }) => {
   // update chat modal
   const [chatToEdit, setChatToEdit] = React.useState<ChatMetadata>();
   const editChatMetaModal = useModal();
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setChatsRefresh((x) => !x);
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (chatsSearch.error) snackbar.show(`Error: ${chatsSearch.errorMessage}`);
