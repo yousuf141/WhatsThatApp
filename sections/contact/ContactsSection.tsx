@@ -120,14 +120,6 @@ const ContactsSection: React.FC = () => {
   function renderUsers(): JSX.Element {
     if (userSearch.loading || contactSearch.loading) return <Loading />;
 
-    if (userSearch.users.length < 1 && offset === 0) {
-      return (
-        <Text style={{ textAlign: "center", margin: 10 }}>
-          No users found...
-        </Text>
-      );
-    }
-
     return (
       <View>
         <FlatList
