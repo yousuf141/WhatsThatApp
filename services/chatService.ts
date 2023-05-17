@@ -212,6 +212,56 @@ class ChatService extends BaseFetchService {
       return { success: false, message: "Unknown Error" };
     }
   }
+
+  async updateMessage(
+    chatId: number,
+    messageId: number,
+    message: string,
+    authKey: string
+  ): Promise<FetchResult> {
+    try {
+      const res = await fetch(
+        this.baseUrl + `/chat/${chatId}/message/${messageId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ message }),
+          headers: { ...this.defaultHeaders, "X-Authorization": authKey },
+        }
+      );
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
+
+  async deleteMessageById(
+    chatId: number,
+    messageId: number,
+    authKey: string
+  ): Promise<FetchResult> {
+    try {
+      const res = await fetch(
+        this.baseUrl + `/chat/${chatId}/message/${messageId}`,
+        {
+          method: "DELETE",
+          headers: { ...this.defaultHeaders, "X-Authorization": authKey },
+        }
+      );
+
+      const error = this.handleError(res.status);
+      if (error != null) return error;
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: "Unknown Error" };
+    }
+  }
 }
 
 export const chatService = new ChatService();

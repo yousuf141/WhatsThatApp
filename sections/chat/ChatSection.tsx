@@ -5,6 +5,7 @@ import { Button, Card, Divider, Text, TextInput } from "react-native-paper";
 import { type RouteProp } from "@react-navigation/native";
 
 import { type ChatMetadata } from "../../models/chat/ChatMetadata";
+import { type Message } from "../../models/chat/message";
 
 import { useAuth } from "../../providers/AuthProvider";
 import { useSnackbar } from "../../hooks/useSnackbar";
@@ -19,6 +20,7 @@ import UserIcon from "../../components/user/UserIcon";
 
 import AddContactToChatModal from "../../components/modals/AddContactToChatModal";
 import RemoveContactFromChatModal from "../../components/modals/RemoveContactFromChatModal";
+import EditMessageModal from "../../components/modals/EditMessageModal";
 
 interface ChatSectionProps {
   route: RouteProp<{ params: { chatMeta: ChatMetadata } }>;
@@ -31,6 +33,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
   const [auth] = useAuth();
   const snackbar = useSnackbar();
 
+  // Chat Details States
   const limit = 100;
   const [offset] = React.useState(0);
   const [refreshChat, setRefreshChat] = React.useState(false);
@@ -45,6 +48,11 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
 
   const addContactToChatModal = useModal();
   const removeContactFromChatModal = useModal();
+
+  // Message States
+  const [messageToEdit, setMessageToEdit] = React.useState<Message>();
+
+  const editMessageModal = useModal();
 
   function handleRemoveContactFromChat(): void {
     removeContactFromChatModal.show();
@@ -66,6 +74,11 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
       setRefreshChat((x) => !x);
       setNewMessage("");
     }
+  }
+
+  function handleEditMessage(message: Message): void {
+    setMessageToEdit(message);
+    editMessageModal.show();
   }
 
   function renderHeader(): JSX.Element {
@@ -153,15 +166,41 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
           if (auth.userId === item.author.id) author = "You";
 
           return (
-            <Card key={item.id}>
-              <Card.Title
-                titleStyle={{ fontWeight: "bold" }}
-                title={author}
-                subtitle={new Date(item.timestamp).toLocaleString()}
-              />
-              <Card.Content>
-                <Text>{item.message}</Text>
-              </Card.Content>
+            <Card
+              key={item.id}
+              contentStyle={{
+                flex: 1,
+                padding: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ flex: 0.8 }}>
+                <Card.Title
+                  titleStyle={{ fontWeight: "bold" }}
+                  title={author}
+                  subtitle={new Date(item.timestamp).toLocaleString()}
+                />
+                <Card.Content>
+                  <Text>{item.message}</Text>
+                </Card.Content>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  onPress={() => {
+                    handleEditMessage(item);
+                  }}
+                  mode="contained-tonal"
+                >
+                  Edit
+                </Button>
+              </View>
             </Card>
           );
         }}
@@ -220,6 +259,15 @@ const ChatSection: React.FC<ChatSectionProps> = ({ route }) => {
         hide={removeContactFromChatModal.hide}
         chatId={chatMetaId}
         contacts={chatDetailsSearch.chatDetails?.members ?? []}
+        refresh={() => {
+          setRefreshChat((x) => !x);
+        }}
+      />
+      <EditMessageModal
+        visible={editMessageModal.visible}
+        hide={editMessageModal.hide}
+        chatId={chatMetaId}
+        message={messageToEdit as Message}
         refresh={() => {
           setRefreshChat((x) => !x);
         }}
